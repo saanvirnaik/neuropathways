@@ -1,0 +1,32 @@
+# IntelliJ project settings
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Sensitive configuration
+*.pem
+*.key
+
+# Logs
+*.log
+logs/
+
+# Local data (review before committing)
+# data/
+
+# Build outputs
+**/node_modules/
+**/dist/
+**/target/
+**/build/
+**/.gradle/
