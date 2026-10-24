@@ -30,3 +30,21 @@ logs/
 **/target/
 **/build/
 **/.gradle/
+
+# Local smoke-test output and H2 runtime files (existing tracked files stay tracked)
+scripts/smoke-test-reports/
+*.mv.db
+*.trace.db
+*.lock.db
+*.temp.db
+.neuropathways-tools/
+application-local.properties
+application-local.yml
+application-local.yaml
+!.env.*.example
+
+# Deployment destinations, local artifacts and credentials
+deploy/environments.local.json
+.deploy-output/
+*.p12
+*.jks

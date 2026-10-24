@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-flyway'
+	runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 	// REST API
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
@@ -61,3 +63,5 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named('bootJar') { archiveFileName = 'app.jar' }

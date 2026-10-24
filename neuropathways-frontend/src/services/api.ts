@@ -1,4 +1,8 @@
-export const API_BASE_URL = "http://localhost:8080/api";
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+if (import.meta.env.PROD && !configuredApiUrl) {
+    throw new Error("VITE_API_BASE_URL must be configured for production builds.");
+}
+export const API_BASE_URL = (configuredApiUrl || "http://localhost:8080/api").replace(/\/$/, "");
 
 export async function authenticatedFetch(path: string, options: RequestInit = {}) {
     const token = localStorage.getItem("neuropathwaysToken");

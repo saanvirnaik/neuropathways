@@ -27,6 +27,14 @@ export type LoginResponse = {
     email: string;
 };
 
+export function saveLoginSession(response: LoginResponse) {
+    localStorage.setItem("neuropathwaysToken", response.token);
+    localStorage.setItem("neuropathwaysUser", JSON.stringify({
+        userId: response.userId, firstName: response.firstName,
+        lastName: response.lastName, email: response.email,
+    }));
+}
+
 export async function registerUser(
     request: RegisterRequest
 ): Promise<RegisterResponse> {

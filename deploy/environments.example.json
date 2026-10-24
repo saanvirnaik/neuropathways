@@ -1,0 +1,20 @@
+{
+  "Staging": {
+    "frontendUrl": "https://REPLACE-STAGING.hostingersite.com",
+    "backendUrl": "https://REPLACE-STAGING.onrender.com",
+    "renderServiceId": "srv-REPLACE-STAGING",
+    "sshHost": "REPLACE-HOST",
+    "sshPort": 65002,
+    "sshUser": "REPLACE-USER",
+    "documentRoot": "/home/REPLACE-USER/domains/REPLACE-STAGING.hostingersite.com/public_html"
+  },
+  "Production": {
+    "frontendUrl": "https://neuropathways.neurohearts.org",
+    "backendUrl": "https://REPLACE-PRODUCTION.onrender.com",
+    "renderServiceId": "srv-REPLACE-PRODUCTION",
+    "sshHost": "REPLACE-HOST",
+    "sshPort": 65002,
+    "sshUser": "REPLACE-USER",
+    "documentRoot": "/home/REPLACE-USER/domains/neuropathways.neurohearts.org/public_html"
+  }
+}
