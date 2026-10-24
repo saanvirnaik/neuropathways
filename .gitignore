@@ -42,3 +42,9 @@ application-local.properties
 application-local.yml
 application-local.yaml
 !.env.*.example
+
+# Deployment destinations, local artifacts and credentials
+deploy/environments.local.json
+.deploy-output/
+*.p12
+*.jks

@@ -1,0 +1,90 @@
+name: Deploy NeuroPathways
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Destination
+        type: choice
+        options: [Staging, Production]
+        default: Staging
+        required: true
+      commit:
+        description: Full commit SHA to deploy (blank uses selected branch)
+        type: string
+      rollback:
+        description: Previous release ID to restore (leave blank for deployment)
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: deploy-${{ inputs.environment }}
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: ${{ inputs.environment }}
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: np_test
+          POSTGRES_PASSWORD: ephemeral-ci-only
+          POSTGRES_DB: np_test
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U np_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Prepare connection files
+        shell: pwsh
+        env:
+          DEPLOY_CONFIG: ${{ vars.DEPLOY_CONFIG_JSON }}
+          SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.HOSTINGER_KNOWN_HOSTS }}
+        run: |
+          $ErrorActionPreference='Stop'
+          foreach ($value in @($env:DEPLOY_CONFIG,$env:SSH_KEY,$env:KNOWN_HOSTS)) {
+            if ([string]::IsNullOrWhiteSpace($value)) { throw 'Missing deployment environment configuration or SSH secrets.' }
+          }
+          $env:DEPLOY_CONFIG | Set-Content deploy/environments.local.json
+          $env:SSH_KEY | Set-Content "$env:RUNNER_TEMP/hostinger-key"
+          $env:KNOWN_HOSTS | Set-Content "$env:RUNNER_TEMP/known_hosts"
+          chmod 600 "$env:RUNNER_TEMP/hostinger-key"
+      - name: Deploy or roll back
+        shell: pwsh
+        env:
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          TARGET_COMMIT: ${{ inputs.commit }}
+          ROLLBACK_RELEASE: ${{ inputs.rollback }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          NP_SSH_KEY: ${{ runner.temp }}/hostinger-key
+          NP_KNOWN_HOSTS: ${{ runner.temp }}/known_hosts
+          TEST_POSTGRES_URL: jdbc:postgresql://localhost:5432/np_test
+          TEST_POSTGRES_USER: np_test
+          TEST_POSTGRES_PASSWORD: ephemeral-ci-only
+        run: |
+          $p=@{Environment=$env:TARGET_ENVIRONMENT}
+          if ($env:ROLLBACK_RELEASE) { $p.Rollback=$env:ROLLBACK_RELEASE }
+          else { $p.Commit=if ($env:TARGET_COMMIT) {$env:TARGET_COMMIT} else {$env:GITHUB_SHA} }
+          ./scripts/Deploy-NeuroPathways.ps1 @p
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-report
+          path: .deploy-output/*.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+      - name: Remove ephemeral connection files
+        if: always()
+        shell: pwsh
+        run: |
+          Remove-Item -LiteralPath "$env:RUNNER_TEMP/hostinger-key","$env:RUNNER_TEMP/known_hosts" -Force -ErrorAction SilentlyContinue

@@ -1,5 +1,7 @@
 # NeuroPathways
 
+Deployment setup, releases and rollback: [deployment guide](deploy/README.md).
+
 ## Windows local setup and smoke tests
 
 Run from the repository root in Windows PowerShell 5.1 or PowerShell 7:

@@ -3,7 +3,7 @@ import {useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 
 import Navbar from "../components/Navbar";
-import {registerUser} from "../services/authService";
+import {registerUser, loginUser, saveLoginSession} from "../services/authService";
 
 function Signup() {
     const navigate = useNavigate();
@@ -25,17 +25,18 @@ function Signup() {
         setError("");
 
         try {
-            const registeredUser = await registerUser({
+            await registerUser({
                 firstName,
                 lastName,
                 email,
                 password,
             });
 
-            console.log(
-                "Registration successful:",
-                registeredUser
-            );
+            try {
+                saveLoginSession(await loginUser({email, password}));
+            } catch {
+                throw new Error("Your account was created. Please use the Log in link below to sign in.");
+            }
 
             navigate("/assessment");
         } catch (err) {

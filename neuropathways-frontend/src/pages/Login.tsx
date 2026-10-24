@@ -3,7 +3,7 @@ import {useState} from "react";
 import {Link, useNavigate} from "react-router-dom";
 
 import Navbar from "../components/Navbar";
-import {loginUser} from "../services/authService";
+import {loginUser, saveLoginSession} from "../services/authService";
 
 function Login() {
     const navigate = useNavigate();
@@ -29,25 +29,7 @@ function Login() {
             });
 
 
-            console.log(
-                "Login successful:",
-                loginResponse
-            );
-
-            localStorage.setItem(
-                "neuropathwaysToken",
-                loginResponse.token
-            );
-
-            localStorage.setItem(
-                "neuropathwaysUser",
-                JSON.stringify({
-                    userId: loginResponse.userId,
-                    firstName: loginResponse.firstName,
-                    lastName: loginResponse.lastName,
-                    email: loginResponse.email,
-                })
-            );
+            saveLoginSession(loginResponse);
 
             navigate("/dashboard");
         } catch (err) {

@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Assessment from "./pages/Assessment";
 import AssessmentSession from "./pages/AssessmentSession";
+import AssessmentResults from "./pages/AssessmentResults";
 import Dashboard from "./pages/Dashboard";
 import LearningPath from "./pages/LearningPath";
 
@@ -12,6 +13,7 @@ function App() {
     return (
         <BrowserRouter>
             <Routes>
+                <Route path="/assessment/session/:sessionId/results" element={<AssessmentResults/>}/>
                 {/* Public pages */}
                 <Route path="/" element={<Home/>}/>
 

@@ -1,0 +1,12 @@
+*
+!Dockerfile
+!gradle/
+!gradle/**
+!gradlew
+!build.gradle
+!settings.gradle
+!gradle.properties
+!src/
+!src/**
+**/application-local.*
+**/.env*
