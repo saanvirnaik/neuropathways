@@ -2,6 +2,32 @@
 
 Deploy the React frontend to a dedicated Hostinger PHP/HTML website, the Java backend to Render, and the production schema to Neon PostgreSQL. Keep the existing AI Builder website at `neuropathways.neurohearts.org` until staging is verified and a domain cutover is deliberately performed. This script never changes DNS or provisions paid services.
 
+## One command through GitHub Actions
+
+After cloning this repository, install PowerShell 7.4+ and GitHub CLI, then run `gh auth login` as a repository maintainer. From the repository root:
+
+```powershell
+pwsh ./scripts/Deploy-FromGitHub.ps1 -Environment Staging
+```
+
+The command dispatches `deploy.yml`, identifies its own run using a unique request ID, waits for completion, and fails if the workflow fails. All builds and hosting connections run on GitHub, so Java, npm, PostgreSQL, and SSH are not required on the operator's computer. `-NoWait` prints the run URL and returns after dispatch.
+
+One-time or diagnostic operations:
+
+```powershell
+pwsh ./scripts/Deploy-FromGitHub.ps1 -Operation CheckConnection
+pwsh ./scripts/Deploy-FromGitHub.ps1 -Operation AdoptStaging
+pwsh ./scripts/Deploy-FromGitHub.ps1 -Environment Production -Operation Initialize
+pwsh ./scripts/Deploy-FromGitHub.ps1 -Environment Staging -Commit <full-sha>
+pwsh ./scripts/Deploy-FromGitHub.ps1 -Environment Staging -Operation Rollback -Rollback <managed-release-id>
+```
+
+`AdoptStaging` is restricted to the existing verified temporary staging site and initial commit. It archives the existing files outside `public_html` before creating a deployment marker. It does not delete or activate files. The initial File Manager release has no managed rollback ID; preserve that archive for manual recovery. A failed adoption requires inspecting its partial state before retrying.
+
+GitHub environment `Staging` requires variable `DEPLOY_CONFIG_JSON` (see `environments.staging.json`) and secrets `HOSTINGER_SSH_KEY` and `RENDER_API_KEY`. The workflow obtains the ED25519 host key from the configured server and compares it with the fingerprint copied from authenticated Hostinger hPanel. A mismatch or timeout stops before upload. `HOSTINGER_KNOWN_HOSTS` is no longer required by GitHub Actions; direct local deployment still requires `NP_KNOWN_HOSTS`.
+
+Production is deliberately unconfigured in the staging config. Provision its own destinations and set its GitHub environment variable and secrets before using it. Deploy the exact production candidate to staging first. No recurring schedule is enabled.
+
 ## One-time setup
 
 1. Create separate staging and production PostgreSQL databases in Neon. Use fresh empty databases, not the tracked local H2 database. Keep their credentials separate. Select a region close to Render. Set up and verify the recovery/backup option included in the chosen Neon plan before storing real learner records.
@@ -53,7 +79,7 @@ Deployment is not a distributed transaction. A healthy new backend can remain li
 
 ## GitHub Actions
 
-`Validate application` builds the frontend and tests the backend against disposable PostgreSQL on pushes and pull requests. `Deploy NeuroPathways` is manually dispatched and accepts an environment, optional full SHA, or a rollback release ID. Create GitHub environments named `Staging` and `Production`; configure production reviewers/restrictions as appropriate for the repository plan. Set each environment's variable `DEPLOY_CONFIG_JSON` to the complete non-secret configuration JSON. Set secrets `HOSTINGER_SSH_KEY`, `HOSTINGER_KNOWN_HOSTS`, and `RENDER_API_KEY`. Database/JWT production secrets stay in Render.
+`Validate application` builds the frontend and tests the backend against disposable PostgreSQL on pushes and pull requests. `Deploy NeuroPathways` is manually dispatched and accepts an environment, optional full SHA, or a rollback release ID. Create GitHub environments named `Staging` and `Production`; configure production reviewers/restrictions as appropriate for the repository plan. Set each environment's variable `DEPLOY_CONFIG_JSON` to the complete non-secret configuration JSON. Set secrets `HOSTINGER_SSH_KEY` and `RENDER_API_KEY`, and include the hPanel-verified `sshHostFingerprint` in the configuration. Database/JWT production secrets stay in Render.
 
 A deployment workflow must be on the default branch before GitHub exposes manual dispatch. Test the branch first and merge it through the repository's normal review process. Workflows do not create a recurring schedule or enable automatic production deploys. For later periodic releases, agree on a cadence and permitted branch, then invoke this same script; unchanged healthy releases are skipped. Periodic health monitoring should be independent of deployment.
 
@@ -62,3 +88,4 @@ A deployment workflow must be on the default branch before GitHub exposes manual
 After staging acceptance, preserve the existing AI Builder site under a temporary address or export it as supported by Hostinger. Prepare a dedicated production PHP/HTML site, provision its Render/Neon configuration, and deploy the tested commit. Verify HTTPS before switching the existing subdomain to the new site. Keep the old destination and DNS records available for a controlled rollback. The script deliberately does not perform this one-time cutover.
 
 References: [Hostinger SSH and transfer support](https://www.hostinger.com/support/which-file-transfer-and-server-access-options-are-supported-at-hostinger/), [Render deployment API](https://api-docs.render.com/reference/create-deploy), [Render rollback API](https://api-docs.render.com/reference/rollback-deploy), [Spring Boot migrations](https://docs.spring.io/spring-boot/how-to/data-initialization.html).
+

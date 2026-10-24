@@ -1,4 +1,5 @@
 name: Deploy NeuroPathways
+run-name: NeuroPathways ${{ inputs.environment }} ${{ inputs.operation }} ${{ inputs.request_id }}
 on:
   workflow_dispatch:
     inputs:
@@ -8,11 +9,20 @@ on:
         options: [Staging, Production]
         default: Staging
         required: true
+      operation:
+        description: Deploy or one-time setup operation
+        type: choice
+        options: [Deploy, CheckConnection, Initialize, AdoptStaging, Rollback]
+        default: Deploy
+        required: true
       commit:
         description: Full commit SHA to deploy (blank uses selected branch)
         type: string
       rollback:
-        description: Previous release ID to restore (leave blank for deployment)
+        description: Previous managed release ID for Rollback
+        type: string
+      request_id:
+        description: Optional unique request ID supplied by Deploy-FromGitHub.ps1
         type: string
 permissions:
   contents: read
@@ -44,25 +54,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Prepare connection files
+      - name: Prepare and verify SSH connection
         shell: pwsh
         env:
           DEPLOY_CONFIG: ${{ vars.DEPLOY_CONFIG_JSON }}
           SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
-          KNOWN_HOSTS: ${{ secrets.HOSTINGER_KNOWN_HOSTS }}
+          TARGET_ENVIRONMENT: ${{ inputs.environment }}
         run: |
           $ErrorActionPreference='Stop'
-          foreach ($value in @($env:DEPLOY_CONFIG,$env:SSH_KEY,$env:KNOWN_HOSTS)) {
-            if ([string]::IsNullOrWhiteSpace($value)) { throw 'Missing deployment environment configuration or SSH secrets.' }
-          }
+          if (!$env:DEPLOY_CONFIG -or !$env:SSH_KEY) { throw 'Missing DEPLOY_CONFIG_JSON or HOSTINGER_SSH_KEY in the selected GitHub environment.' }
           $env:DEPLOY_CONFIG | Set-Content deploy/environments.local.json
           $env:SSH_KEY | Set-Content "$env:RUNNER_TEMP/hostinger-key"
-          $env:KNOWN_HOSTS | Set-Content "$env:RUNNER_TEMP/known_hosts"
           chmod 600 "$env:RUNNER_TEMP/hostinger-key"
-      - name: Deploy or roll back
+          ./scripts/Prepare-HostingerConnection.ps1 -ConfigPath deploy/environments.local.json -Environment $env:TARGET_ENVIRONMENT -KnownHostsPath "$env:RUNNER_TEMP/known_hosts"
+      - name: Execute requested operation
         shell: pwsh
         env:
           TARGET_ENVIRONMENT: ${{ inputs.environment }}
+          OPERATION: ${{ inputs.operation }}
           TARGET_COMMIT: ${{ inputs.commit }}
           ROLLBACK_RELEASE: ${{ inputs.rollback }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -72,9 +81,19 @@ jobs:
           TEST_POSTGRES_USER: np_test
           TEST_POSTGRES_PASSWORD: ephemeral-ci-only
         run: |
+          $ErrorActionPreference='Stop'
           $p=@{Environment=$env:TARGET_ENVIRONMENT}
-          if ($env:ROLLBACK_RELEASE) { $p.Rollback=$env:ROLLBACK_RELEASE }
-          else { $p.Commit=if ($env:TARGET_COMMIT) {$env:TARGET_COMMIT} else {$env:GITHUB_SHA} }
+          switch ($env:OPERATION) {
+            'CheckConnection' { $p.CheckConnection=$true }
+            'Initialize' { $p.Initialize=$true }
+            'AdoptStaging' { $p.AdoptInitialStaging=$true }
+            'Rollback' {
+              if (!$env:ROLLBACK_RELEASE) { throw 'A managed release ID is required.' }
+              $p.Rollback=$env:ROLLBACK_RELEASE
+            }
+            'Deploy' { $p.Commit=if ($env:TARGET_COMMIT) {$env:TARGET_COMMIT} else {$env:GITHUB_SHA} }
+            default { throw 'Unknown deployment operation.' }
+          }
           ./scripts/Deploy-NeuroPathways.ps1 @p
       - uses: actions/upload-artifact@v4
         if: always()

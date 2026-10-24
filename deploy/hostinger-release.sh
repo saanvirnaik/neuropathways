@@ -9,6 +9,32 @@ action=${1:?}; root=${2:?}; owner=${3:?}; release=${4:-}
 [[ "$(realpath "$root")" == "$root" ]] || { echo 'Refusing a symlinked path' >&2; exit 65; }
 state="$(dirname "$root")/.neuropathways-deploy"
 [[ ! -L "$state" && ! -L "$root/releases" ]] || exit 65
+if [[ "$action" == inspect ]]; then
+    printf 'Verified document root: %s\n' "$root"
+    [[ -w "$root" ]] || { echo 'Document root is not writable' >&2; exit 65; }
+    command -v tar >/dev/null
+    command -v sha256sum >/dev/null
+    echo 'SSH authentication and required release tools passed'
+    exit 0
+fi
+if [[ "$action" == adopt-initial ]]; then
+    [[ "$root" == /home/u781289971/domains/indigo-jackal-371617.hostingersite.com/public_html ]] || exit 65
+    if [[ -f "$state/managed" ]]; then
+        [[ "$(cat "$state/managed")" == "$root" ]] || exit 65
+        echo 'Already initialized'; exit 0
+    fi
+    [[ ! -e "$state" && ! -e "$root/releases" ]] || { echo 'Unexpected deployment state; inspect before adoption' >&2; exit 65; }
+    [[ -f "$root/version.json" && ! -L "$root/version.json" ]]
+    grep -q '"commit":"5ac72f8d330c77bb2b6c917fe3b0a85136e9b5ab"' "$root/version.json"
+    grep -q '"deploymentMethod":"initial-file-manager-upload"' "$root/version.json"
+    mkdir "$state"
+    tar -czf "$state/initial-file-manager-backup.tar.gz" -C "$root" .
+    tar -tzf "$state/initial-file-manager-backup.tar.gz" >/dev/null
+    mkdir "$root/releases"
+    printf '%s\n' "$root" > "$state/managed"
+    echo 'Initial staging files backed up outside public_html and adopted; existing site remains active'
+    exit 0
+fi
 if [[ "$action" == initialize ]]; then
     if [[ -f "$state/managed" ]]; then echo 'Already initialized'; exit 0; fi
     [[ -z "$(find "$root" -mindepth 1 -maxdepth 1 -print -quit)" ]] || {
@@ -63,6 +89,7 @@ case "$action" in
                 cp "$state/incoming-$owner/release.json" "$state/$release.json"
                 cat > "$root/.htaccess" <<'HTACCESS'
 Options -Indexes
+DirectoryIndex index.html
 RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

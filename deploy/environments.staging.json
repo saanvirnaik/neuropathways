@@ -1,0 +1,15 @@
+{
+  "Staging": {
+    "frontendUrl": "https://indigo-jackal-371617.hostingersite.com",
+    "backendUrl": "https://neuropathways-api-staging.onrender.com",
+    "renderServiceId": "srv-dbe6ck7b9u1s738iie30",
+    "sshHost": "82.197.80.222",
+    "sshPort": 65002,
+    "sshUser": "u781289971",
+    "documentRoot": "/home/u781289971/domains/indigo-jackal-371617.hostingersite.com/public_html",
+    "sshHostFingerprint": "SHA256:s9/Mx/eADR/i4ujQeDrQcb6OF6SQDcaMDahYeIkBSkY"
+  },
+  "Production": {
+    "backendUrl": null
+  }
+}

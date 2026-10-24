@@ -5,6 +5,8 @@ param(
     [Parameter(ParameterSetName='Deploy')][string]$Commit = 'HEAD',
     [Parameter(Mandatory,ParameterSetName='Rollback')][ValidatePattern('^[a-f0-9]{40}-[a-f0-9]{12}$')][string]$Rollback,
     [Parameter(Mandatory,ParameterSetName='Initialize')][switch]$Initialize,
+    [Parameter(Mandatory,ParameterSetName='Adopt')][switch]$AdoptInitialStaging,
+    [Parameter(Mandatory,ParameterSetName='Check')][switch]$CheckConnection,
     [string]$ConfigPath = '',
     [switch]$Plan,
     [ValidateRange(1,60)][int]$TimeoutMinutes = 20
@@ -53,7 +55,7 @@ function Read-JsonUrl([string]$Url) {
     Invoke-RestMethod -Uri $Url -TimeoutSec 30 -MaximumRedirection 0 -Headers @{'Cache-Control'='no-cache'}
 }
 function Check-Backend([string]$ExpectedCommit) {
-    $deadline = (Get-Date).AddMinutes(2)
+    $deadline = (Get-Date).AddMinutes(6)
     do {
         try {
             $health=Read-JsonUrl "$($cfg.backendUrl)/actuator/health"
@@ -95,6 +97,9 @@ $allConfig=Get-Content -LiteralPath $ConfigPath -Raw | ConvertFrom-Json -AsHasht
 if (!$allConfig.Contains($Environment)) { throw "Missing $Environment configuration." }
 $cfg=$allConfig[$Environment]
 Read-Config $cfg
+if ($AdoptInitialStaging -and ($Environment -ne 'Staging' -or $cfg.frontendUrl -ne 'https://indigo-jackal-371617.hostingersite.com')) {
+    throw 'Initial adoption is restricted to the verified Hostinger staging site.'
+}
 $sha = if ($Rollback) { $Rollback.Substring(0,40) } else {
     $resolved = Run git @('-C',$repo,'rev-parse','--verify',"$Commit^{commit}")
     ([string]$resolved).Trim()
@@ -118,6 +123,8 @@ foreach ($name in @('NP_SSH_KEY','NP_KNOWN_HOSTS')) {
 $sshArgs=@('-i',$env:NP_SSH_KEY,'-o','IdentitiesOnly=yes','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o',"UserKnownHostsFile=$env:NP_KNOWN_HOSTS",'-o','ConnectTimeout=15','-p',[string]$cfg.sshPort)
 $scpArgs=@('-i',$env:NP_SSH_KEY,'-o','IdentitiesOnly=yes','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o',"UserKnownHostsFile=$env:NP_KNOWN_HOSTS",'-o','ConnectTimeout=15','-P',[string]$cfg.sshPort)
 $owner=[guid]::NewGuid().ToString('N')
+if ($CheckConnection) { Remote inspect; return }
+if ($AdoptInitialStaging) { Remote adopt-initial; return }
 if ($Initialize) { Remote initialize; return }
 if (!$env:RENDER_API_KEY) { throw 'RENDER_API_KEY is required.' }
 $service=Render GET ''
