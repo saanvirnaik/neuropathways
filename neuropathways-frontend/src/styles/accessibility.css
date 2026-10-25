@@ -1,0 +1,362 @@
+
+/* NeuroPathways Accessibility Page */
+
+.accessibility-page {
+    width: 100%;
+    color: #172552;
+}
+
+.accessibility-container {
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+/* Hero */
+
+.accessibility-hero {
+    padding: 95px 24px 90px;
+    background: linear-gradient(
+            135deg,
+            #f2f9fc,
+            #f7f5ff
+    );
+    text-align: center;
+}
+
+.accessibility-hero .accessibility-container {
+    max-width: 800px;
+}
+
+.accessibility-eyebrow {
+    display: block;
+    color: #7057f5;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.accessibility-hero h1 {
+    color: #172552;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.2;
+    margin: 0 0 24px;
+}
+
+.accessibility-hero p {
+    color: #64718c;
+    font-size: 17px;
+    line-height: 1.85;
+    margin: 0 auto 24px;
+}
+
+.accessibility-hero strong {
+    color: #7057f5;
+    font-size: 16px;
+}
+
+/* Sections */
+
+.accessibility-section {
+    padding: 95px 24px 105px;
+    background: #ffffff;
+    scroll-margin-top: 100px;
+}
+
+.accessibility-tinted {
+    background: #f2f9fc;
+}
+
+.accessibility-heading {
+    max-width: 760px;
+    margin: 0 auto 48px;
+    text-align: center;
+}
+
+.accessibility-heading span {
+    display: block;
+    color: #008bae;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+}
+
+.accessibility-heading h2 {
+    color: #172552;
+    font-size: clamp(27px, 3vw, 38px);
+    line-height: 1.3;
+    margin: 0 0 18px;
+}
+
+.accessibility-heading p {
+    color: #64718c;
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+/* Commitment */
+
+.accessibility-commitment {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 30px;
+    align-items: start;
+    padding: 44px;
+    background: #ffffff;
+    border: 1px solid #e2e7f3;
+    border-radius: 24px;
+    box-shadow: 0 8px 28px rgba(20, 35, 85, 0.04);
+}
+
+.accessibility-commitment-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    background: #f0ecff;
+    border-radius: 22px;
+    font-size: 44px;
+}
+
+.accessibility-commitment h2 {
+    color: #172552;
+    font-size: clamp(25px, 3vw, 34px);
+    line-height: 1.3;
+    margin: 0 0 20px;
+}
+
+.accessibility-commitment p {
+    color: #64718c;
+    font-size: 16px;
+    line-height: 1.85;
+    margin: 0 0 15px;
+}
+
+/* Tool cards */
+
+.accessibility-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.accessibility-tool-card,
+.accessibility-principle-card {
+    min-width: 0;
+    background: #ffffff;
+    border: 1px solid #e2e7f3;
+    border-radius: 20px;
+    padding: 28px 24px;
+    box-shadow: 0 5px 20px rgba(28, 39, 89, 0.035);
+    transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.accessibility-tool-card:hover,
+.accessibility-principle-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(28, 39, 89, 0.08);
+}
+
+.accessibility-tool-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    background: #f0ecff;
+    border-radius: 16px;
+    font-size: 26px;
+    margin-bottom: 22px;
+}
+
+.accessibility-tool-card h3,
+.accessibility-principle-card h3 {
+    color: #172552;
+    font-size: 18px;
+    line-height: 1.4;
+    margin: 0 0 12px;
+}
+
+.accessibility-tool-card p,
+.accessibility-principle-card p {
+    color: #64718c;
+    font-size: 14px;
+    line-height: 1.8;
+    margin: 0;
+}
+
+.accessibility-tool-tip {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 20px;
+    padding: 14px;
+    background: #f7f5ff;
+    border-radius: 12px;
+    color: #64718c;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.accessibility-tool-tip strong {
+    color: #7057f5;
+}
+
+.accessibility-tools-note {
+    max-width: 760px;
+    margin: 32px auto 0;
+    text-align: center;
+    color: #64718c;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Accessibility principles */
+
+.accessibility-principles-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 22px;
+}
+
+/* Tips */
+
+.accessibility-tips-panel {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 48px;
+    background: #ffffff;
+    border: 1px solid #e2e7f3;
+    border-radius: 24px;
+}
+
+.accessibility-tips-panel h2 {
+    color: #172552;
+    font-size: clamp(26px, 3vw, 36px);
+    line-height: 1.3;
+    margin: 0 0 20px;
+}
+
+.accessibility-tips-panel p {
+    color: #64718c;
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.accessibility-tips-panel ul {
+    color: #35466c;
+    font-size: 15px;
+    line-height: 2;
+    padding-left: 24px;
+    margin: 20px 0 30px;
+}
+
+/* Buttons */
+
+.accessibility-primary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background: #7057f5;
+    color: #ffffff;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.accessibility-primary-link:hover {
+    background: #5941d9;
+}
+
+/* Feedback */
+
+.accessibility-feedback {
+    padding: 90px 24px;
+    background: #f7f5ff;
+    text-align: center;
+}
+
+.accessibility-feedback .accessibility-container {
+    max-width: 760px;
+}
+
+.accessibility-feedback h2 {
+    color: #172552;
+    font-size: clamp(27px, 3vw, 36px);
+    margin: 0 0 20px;
+}
+
+.accessibility-feedback p {
+    color: #64718c;
+    font-size: 16px;
+    line-height: 1.85;
+    margin: 0 0 30px;
+}
+
+/* Keyboard accessibility */
+
+.accessibility-page a:focus-visible {
+    outline: 3px solid #7057f5;
+    outline-offset: 4px;
+}
+
+/* Tablet */
+
+@media (max-width: 950px) {
+    .accessibility-tools-grid,
+    .accessibility-principles-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .accessibility-section {
+        padding: 75px 24px;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .accessibility-hero {
+        padding: 65px 20px;
+    }
+
+    .accessibility-section {
+        padding: 65px 20px;
+    }
+
+    .accessibility-tools-grid,
+    .accessibility-principles-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .accessibility-commitment {
+        grid-template-columns: 1fr;
+        padding: 26px 22px;
+    }
+
+    .accessibility-tips-panel {
+        padding: 26px 22px;
+    }
+
+    .accessibility-feedback {
+        padding: 65px 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accessibility-tool-card,
+    .accessibility-principle-card {
+        transition: none;
+    }
+
+    .accessibility-tool-card:hover,
+    .accessibility-principle-card:hover {
+        transform: none;
+    }
+}

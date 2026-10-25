@@ -8,6 +8,7 @@
 
 html {
     scroll-behavior: smooth;
+    scroll-padding-top: 100px;
 }
 
 body {
@@ -90,7 +91,7 @@ button {
 }
 
 .brand-name span {
-    color: #14a4c1;
+    color: #6f5cf6;
 }
 
 .brand-tagline {
@@ -135,6 +136,119 @@ button {
     width: 100%;
 }
 
+.nav-dashboard-btn,
+.nav-logout-btn {
+    gap: 8px;
+}
+/* Shared navigation button styles */
+
+.nav-login-btn,
+.nav-signup-btn,
+.nav-dashboard-btn,
+.nav-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    padding: 10px 20px;
+
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+
+    cursor: pointer;
+    box-sizing: border-box;
+
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
+}
+
+/* Outlined buttons: Log In and Dashboard */
+
+.nav-login-btn,
+.nav-dashboard-btn {
+    background: #ffffff;
+    color: #7057f5;
+    border: 1px solid #d8d0ff;
+}
+
+.nav-login-btn:hover,
+.nav-dashboard-btn:hover {
+    background: #f7f5ff;
+    border-color: #7057f5;
+    transform: translateY(-1px);
+}
+
+/* Purple buttons: Get Started and Log Out */
+
+.nav-signup-btn,
+.nav-logout-btn {
+    background: #7057f5;
+    color: #ffffff;
+    border: 1px solid #7057f5;
+}
+
+.nav-signup-btn:hover,
+.nav-logout-btn:hover {
+    background: #5941d9;
+    border-color: #5941d9;
+    transform: translateY(-1px);
+}
+
+/* Consistent spacing */
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Keyboard accessibility */
+
+.nav-login-btn:focus-visible,
+.nav-signup-btn:focus-visible,
+.nav-dashboard-btn:focus-visible,
+.nav-logout-btn:focus-visible {
+    outline: 3px solid #bcb0ff;
+    outline-offset: 3px;
+}
+
+/* Mobile */
+
+@media (max-width: 768px) {
+    .nav-login-btn,
+    .nav-signup-btn,
+    .nav-dashboard-btn,
+    .nav-logout-btn {
+        min-height: 40px;
+        padding: 9px 14px;
+        font-size: 13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-login-btn,
+    .nav-signup-btn,
+    .nav-dashboard-btn,
+    .nav-logout-btn {
+        transition: none;
+    }
+
+    .nav-login-btn:hover,
+    .nav-signup-btn:hover,
+    .nav-dashboard-btn:hover,
+    .nav-logout-btn:hover {
+        transform: none;
+    }
+}
+
 .nav-actions {
     display: flex;
     align-items: center;
@@ -154,6 +268,12 @@ button {
     transition:
             border-color 0.2s ease,
             color 0.2s ease;
+}
+#journey,
+#features,
+#tools,
+#about {
+    scroll-margin-top: 100px;
 }
 
 .login-button:hover {
@@ -262,7 +382,7 @@ button {
 
 .eyebrow,
 .card-label {
-    color: #159ab4;
+    color: #6f5cf6;
 
     font-size: 12px;
     font-weight: 800;
@@ -446,7 +566,7 @@ button {
 
     font-size: 12px;
 
-    color: #159ab4;
+    color: #6f5cf6;
 }
 
 .section-heading h2 {
@@ -606,7 +726,7 @@ button {
 }
 
 .footer-logo-name span {
-    color: #17a5c1;
+    color: #6f5cf6;
 }
 
 .footer-tagline {
@@ -694,6 +814,14 @@ button {
     color: #6f5cf6;
 }
 
+.footer-disclaimer {
+    max-width: 800px;
+    margin: 14px auto 0;
+    color: #8c96aa;
+    font-size: 12px;
+    line-height: 1.7;
+    text-align: center;
+}
 
 /* =========================================================
    SHARED APP PAGES
@@ -743,7 +871,7 @@ button {
 
     letter-spacing: 1.5px;
 
-    color: #1c9ab5;
+    color: #6f5cf6;
 }
 
 .auth-heading h1 {
@@ -2107,10 +2235,101 @@ button.reading-setting {
     color: #69728e;
 }
 
-
+.nav-get-started {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+}
 /* =========================================================
    TABLET
    ========================================================= */
+
+/* Logged-in navigation buttons */
+
+.nav-dashboard-btn,
+.nav-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 42px;
+    padding: 10px 20px;
+
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+
+    cursor: pointer;
+    box-sizing: border-box;
+
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            transform 0.2s ease;
+}
+
+/* Dashboard - outlined button */
+
+.nav-dashboard-btn {
+    background: #ffffff;
+    color: #7057f5;
+    border: 1px solid #d8d0ff;
+}
+
+.nav-dashboard-btn:hover {
+    background: #f7f5ff;
+    border-color: #7057f5;
+    transform: translateY(-1px);
+}
+
+/* Log Out - purple button */
+
+.nav-logout-btn {
+    background: #7057f5;
+    color: #ffffff;
+    border: 1px solid #7057f5;
+}
+
+.nav-logout-btn:hover {
+    background: #5941d9;
+    border-color: #5941d9;
+    transform: translateY(-1px);
+}
+
+/* Keyboard accessibility */
+
+.nav-dashboard-btn:focus-visible,
+.nav-logout-btn:focus-visible {
+    outline: 3px solid #bcb0ff;
+    outline-offset: 3px;
+}
+
+/* Mobile adjustments */
+
+@media (max-width: 768px) {
+    .nav-dashboard-btn,
+    .nav-logout-btn {
+        padding: 9px 14px;
+        min-height: 40px;
+        font-size: 13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-dashboard-btn,
+    .nav-logout-btn {
+        transition: none;
+    }
+
+    .nav-dashboard-btn:hover,
+    .nav-logout-btn:hover {
+        transform: none;
+    }
+}
 
 @media (max-width: 950px) {
 
@@ -3061,4 +3280,27 @@ button.reading-setting {
         min-width: 0;
     }
 
+}
+
+
+/* Homepage section separation */
+
+.journey-section {
+    background: #f2f9fc;
+    padding-top: 90px;
+    padding-bottom: 100px;
+}
+
+.adaptive-section {
+    background: #ffffff;
+    padding-top: 100px;
+    padding-bottom: 110px;
+}
+
+/* Consistent section alignment */
+
+.journey-section,
+.features-section,
+.adaptive-section {
+    scroll-margin-top: 100px;
 }

@@ -39,7 +39,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
 	// H2 console - for local development
-	implementation 'org.springframework.boot:spring-boot-h2console'
+	implementation 'org.springframework.boot:spring-boot-h2console';
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// Local/test database
 	runtimeOnly 'com.h2database:h2'

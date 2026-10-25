@@ -1,9 +1,52 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { LayoutDashboard, LogOut } from "lucide-react";
 
 function Navbar() {
+    const navigate = useNavigate();
+
+    const [isLoggedIn, setIsLoggedIn] = useState(
+        () => !!localStorage.getItem("neuropathwaysToken")
+    );
+
+    const handleLogout = () => {
+        localStorage.removeItem("neuropathwaysToken");
+        localStorage.removeItem("neuropathwaysUser");
+
+        setIsLoggedIn(false);
+        window.dispatchEvent(new Event("neuropathways-auth-changed"));
+        navigate("/");
+    };
+
+    useEffect(() => {
+        const syncAuthState = () => {
+            setIsLoggedIn(
+                !!localStorage.getItem("neuropathwaysToken")
+            );
+        };
+
+        window.addEventListener(
+            "neuropathways-auth-changed",
+            syncAuthState
+        );
+
+        window.addEventListener("storage", syncAuthState);
+
+        return () => {
+            window.removeEventListener(
+                "neuropathways-auth-changed",
+                syncAuthState
+            );
+
+            window.removeEventListener("storage", syncAuthState);
+        };
+    }, []);
+
     return (
         <header className="navbar">
             <div className="navbar-inner">
+
                 <Link to="/" className="brand">
                     <div className="brand-icon">📖</div>
 
@@ -19,21 +62,57 @@ function Navbar() {
                 </Link>
 
                 <nav className="nav-links">
-                    <a href="#how-it-works">How It Works</a>
-                    <a href="#features">Features</a>
-                    <a href="#adaptive-tools">Adaptive Tools</a>
-                    <a href="#about">About</a>
+                    <Link to="/#journey">
+                        How It Works
+                    </Link>
+
+                    <Link to="/#tools">
+                        Adaptive Tools
+                    </Link>
+
+                    <Link to="/about">About</Link>
                 </nav>
 
                 <div className="nav-actions">
-                    <Link to="/login" className="login-button">
-                        Log In
-                    </Link>
 
-                    <Link to="/signup" className="start-button">
-                        Get Started
-                    </Link>
+                    {isLoggedIn ? (
+                        <>
+                            <Link
+                                to="/dashboard"
+                                className="nav-dashboard-btn"
+                            >
+                                <LayoutDashboard size={16} aria-hidden="true" />
+                                Dashboard
+                            </Link>
+
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className="nav-logout-btn"
+                            >
+                                <LogOut size={16} aria-hidden="true" />
+                                Log Out
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                to="/login"
+                                className="nav-login-btn"
+                            >
+                                Log In
+                            </Link>
+
+                            <Link
+                                to="/signup"
+                                className="nav-signup-btn"
+                            >
+                                Get Started
+                            </Link>
+                        </>
+                    )}
                 </div>
+
             </div>
         </header>
     );

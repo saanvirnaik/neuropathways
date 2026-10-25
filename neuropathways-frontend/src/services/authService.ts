@@ -33,6 +33,7 @@ export function saveLoginSession(response: LoginResponse) {
         userId: response.userId, firstName: response.firstName,
         lastName: response.lastName, email: response.email,
     }));
+    window.dispatchEvent(new Event("neuropathways-auth-changed"));
 }
 
 export async function registerUser(

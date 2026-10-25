@@ -1,4 +1,5 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
+import "./styles/supportpages.css";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -8,10 +9,17 @@ import AssessmentSession from "./pages/AssessmentSession";
 import AssessmentResults from "./pages/AssessmentResults";
 import Dashboard from "./pages/Dashboard";
 import LearningPath from "./pages/LearningPath";
+import About from "./pages/About";
+import Resources from "./pages/Resources";
+import Accessibility from "./pages/Accessibility";
+import Privacy from "./pages/Privacy";
+import Contact from "./pages/Contact";
+import ScrollToHash from "./components/ScrollToHash";
 
 function App() {
     return (
         <BrowserRouter>
+            <ScrollToHash />
             <Routes>
                 <Route path="/assessment/session/:sessionId/results" element={<AssessmentResults/>}/>
                 {/* Public pages */}
@@ -46,10 +54,17 @@ function App() {
                     element={<LearningPath/>}
                 />
 
+                <Route path="/about" element={<About />} />
+
                 <Route
                     path="/dashboard"
                     element={<Dashboard/>}
                 />
+
+                <Route path="/resources" element={<Resources />} />
+                <Route path="/accessibility" element={<Accessibility />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/contact" element={<Contact />} />
             </Routes>
         </BrowserRouter>
     );

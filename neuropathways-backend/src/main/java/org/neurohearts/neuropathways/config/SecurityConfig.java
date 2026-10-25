@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/auth/register", "/api/auth/login", "/actuator/health", "/api/version").permitAll();
+                    auth.requestMatchers("/api/auth/register", "/api/auth/login", "/actuator/health", "/api/version", "/api/contact").permitAll();
                     if (h2ConsoleEnabled) { auth.requestMatchers("/h2-console/**").permitAll(); }
                     else { auth.requestMatchers("/h2-console/**").denyAll(); }
                     auth.anyRequest().authenticated();

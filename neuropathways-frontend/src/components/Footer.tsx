@@ -48,10 +48,10 @@ function Footer() {
           <div className="footer-column">
             <h4>Support</h4>
 
-            <a href="#resources">Resources</a>
-            <a href="#accessibility">Accessibility</a>
-            <a href="#privacy">Privacy</a>
-            <a href="#contact">Contact</a>
+            <Link to="/resources">Resources</Link>
+            <Link to="/accessibility">Accessibility</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/contact">Contact</Link>
           </div>
         </div>
       </div>
@@ -63,6 +63,11 @@ function Footer() {
           Different minds. Different pathways.
         </p>
       </div>
+      <p className="footer-disclaimer">
+        NeuroPathways provides educational reading support.
+        It does not diagnose learning conditions or replace
+        professional educational evaluations.
+      </p>
     </footer>
   );
 }

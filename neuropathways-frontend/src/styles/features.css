@@ -1,0 +1,155 @@
+
+/* NeuroPathways Features Section */
+
+.features-section {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 100px 24px 110px;
+    background: linear-gradient(
+            180deg,
+            #f8f6ff 0%,
+            #f2f5ff 100%
+    );
+    scroll-margin-top: 100px;
+}
+
+/* Section heading */
+
+.features-section .section-heading {
+    max-width: 760px;
+    margin: 0 auto 52px;
+    text-align: center;
+}
+
+.features-section .section-heading span {
+    display: block;
+    color: #7057f5;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+}
+
+.features-section .section-heading h2 {
+    color: #172552;
+    font-size: clamp(28px, 3vw, 38px);
+    font-weight: 750;
+    line-height: 1.25;
+    margin: 0 0 18px;
+}
+
+.features-section .section-heading p {
+    color: #64718c;
+    font-size: 16px;
+    line-height: 1.8;
+    margin: 0 auto;
+}
+
+/* Features card grid */
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+/* Individual feature card */
+
+.feature-card {
+    min-width: 0;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e5e8f5;
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 5px 20px rgba(28, 39, 89, 0.035);
+    transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 32px rgba(60, 50, 130, 0.09);
+    border-color: #cfc5ff;
+}
+
+/* Feature icons */
+
+.feature-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: #f0ecff;
+    font-size: 27px;
+    margin-bottom: 24px;
+}
+
+/* Feature text */
+
+.feature-card h3 {
+    color: #172552;
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0 0 12px;
+}
+
+.feature-card p {
+    color: #64718c;
+    font-size: 15px;
+    line-height: 1.75;
+    margin: 0;
+}
+
+/* Tablet */
+
+@media (max-width: 950px) {
+    .features-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .features-section {
+        padding: 75px 24px;
+    }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+    .features-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .features-section {
+        padding: 65px 20px;
+    }
+
+    .feature-card {
+        padding: 26px 22px;
+    }
+
+    .features-section .section-heading {
+        margin-bottom: 36px;
+    }
+}
+
+/* Respect reduced-motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+    .feature-card {
+        transition: none;
+    }
+
+    .feature-card:hover {
+        transform: none;
+    }
+}

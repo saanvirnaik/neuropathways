@@ -1,0 +1,26 @@
+
+.support-page {
+    min-height: 65vh;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 90px 24px;
+}
+
+.support-page h1 {
+    color: #172552;
+    font-size: clamp(30px, 4vw, 42px);
+    margin-bottom: 24px;
+}
+
+.support-page p {
+    color: #64718c;
+    font-size: 16px;
+    line-height: 1.8;
+    max-width: 760px;
+}
+
+@media (max-width: 600px) {
+    .support-page {
+        padding: 60px 20px;
+    }
+}

@@ -27,3 +27,25 @@ export async function authenticatedFetch(path: string, options: RequestInit = {}
 
     return response;
 }
+export type ContactRequest = {
+    name: string;
+    email: string;
+    topic: "general" | "accessibility" | "privacy" | "technical" | "feedback";
+    message: string;
+};
+
+export async function submitContactMessage(
+    contact: ContactRequest
+): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/contact`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(contact)
+    });
+
+    if (!response.ok) {
+        throw new Error("Unable to submit contact message");
+    }
+}
