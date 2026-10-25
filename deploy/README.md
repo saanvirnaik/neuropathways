@@ -2,6 +2,8 @@
 
 Deploy the React frontend to a dedicated Hostinger PHP/HTML website, the Java backend to Render, and the production schema to Neon PostgreSQL. Keep the existing AI Builder website at `neuropathways.neurohearts.org` until staging is verified and a domain cutover is deliberately performed. This script never changes DNS or provisions paid services.
 
+The [Word operator guide](NeuroPathways%20Deployment%20Guide.docx) covers setup, one-command releases, verification, recovery, and troubleshooting. Its source is `build-deployment-guide.py` (requires Python and python-docx). Staging was successfully deployed and verified in [Actions run 40162424722](https://github.com/saanvirnaik/neuropathways/actions/runs/40162424722). Production is deferred by the owner as of 25 October 2026.
+
 ## One command through GitHub Actions
 
 After cloning this repository, install PowerShell 7.4+ and GitHub CLI, then run `gh auth login` as a repository maintainer. From the repository root:

@@ -1,6 +1,6 @@
 # NeuroPathways
 
-Deployment setup, releases and rollback: [deployment guide](deploy/README.md).
+Deployment setup, releases and rollback: [deployment guide](deploy/README.md) and [Word operator guide](deploy/NeuroPathways%20Deployment%20Guide.docx).
 
 ## Windows local setup and smoke tests
 
