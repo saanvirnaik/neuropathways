@@ -1449,7 +1449,79 @@ button {
 
     line-height: 1.6;
 }
+/* NeuroPathways Dashboard - Practice Buttons */
 
+.dashboard-practice-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    min-height: 54px;
+    padding: 14px 32px;
+
+    background: linear-gradient(
+            110deg,
+            #6d5df7 0%,
+            #9b55f5 100%
+    );
+
+    color: #ffffff;
+    border: none;
+    border-radius: 13px;
+
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    letter-spacing: 0.3px;
+    text-decoration: none;
+
+    cursor: pointer;
+
+    box-shadow: 0 10px 22px rgba(112, 87, 245, 0.22);
+
+    transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            filter 0.2s ease;
+}
+
+.dashboard-practice-btn:hover {
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 28px rgba(112, 87, 245, 0.28);
+    filter: brightness(1.04);
+}
+
+.dashboard-practice-btn:active {
+    transform: translateY(0);
+}
+
+.dashboard-practice-btn:focus-visible {
+    outline: 3px solid #172552;
+    outline-offset: 4px;
+}
+
+.dashboard-practice-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    .dashboard-practice-btn {
+        width: 100%;
+        padding: 14px 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-practice-btn {
+        transition: none;
+    }
+}
 .streak-card {
     min-width: 170px;
 

@@ -100,3 +100,63 @@ export async function submitAssessmentAnswer(
 
     return response.json();
 }
+
+export type AssessmentSkillResult = {
+    skill: string;
+    correctAnswers: number;
+    totalQuestions: number;
+    scorePercent: number;
+    status: string;
+};
+
+export type AssessmentResultResponse = {
+    sessionId: number;
+    overallScore: number;
+    calculatedLevel: number;
+    skills: AssessmentSkillResult[];
+};
+
+
+export async function getAssessmentResults(
+    sessionId: number
+): Promise<AssessmentResultResponse> {
+    const response = await authenticatedFetch(
+        `/assessment-sessions/${sessionId}/results`,
+        {
+            method: "GET"
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            `Unable to load assessment results. Status: ${response.status}`
+        );
+    }
+
+    const contentType =
+        response.headers.get("content-type") ?? "";
+
+    if (!contentType.includes("application/json")) {
+        throw new Error(
+            "The assessment API returned an unexpected response."
+        );
+    }
+
+    return response.json();
+}
+
+export async function getAssessmentStatus():
+    Promise<AssessmentStatusResponse> {
+
+    const response = await authenticatedFetch(
+        "/assessment-sessions/status"
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            `Unable to load assessment status: ${response.status}`
+        );
+    }
+
+    return response.json();
+}

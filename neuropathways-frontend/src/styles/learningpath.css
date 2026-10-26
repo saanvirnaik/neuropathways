@@ -1,0 +1,477 @@
+
+.learning-path-page {
+    min-height: 75vh;
+    background: #f5f7ff;
+    padding: 55px 24px 90px;
+    color: #172552;
+}
+
+.learning-path-container {
+    max-width: 950px;
+    margin: 0 auto;
+}
+
+.learning-path-header {
+    margin-bottom: 32px;
+}
+
+.learning-path-eyebrow {
+    color: #7057f5;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.learning-path-header h1 {
+    margin: 14px 0;
+    font-size: clamp(28px, 4vw, 38px);
+}
+
+.learning-path-header p {
+    color: #64718c;
+    line-height: 1.8;
+    max-width: 700px;
+}
+
+.learning-path-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: white;
+    border-radius: 18px;
+    padding: 28px 24px;
+    margin-bottom: 36px;
+    box-shadow: 0 8px 30px rgba(23, 37, 82, 0.04);
+}
+
+.learning-path-summary p {
+    color: #64718c;
+    margin: 0 0 12px;
+}
+
+.learning-path-summary h2 {
+    margin: 0 0 10px;
+    font-size: 23px;
+}
+
+.learning-path-summary span {
+    color: #64718c;
+    font-size: 13px;
+}
+
+.learning-path-score {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    background: #f0ecff;
+    border-radius: 50%;
+    color: #7057f5;
+    font-weight: 800;
+}
+
+.learning-path-levels {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.learning-path-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 23px 20px;
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 16px;
+    box-shadow: 0 5px 22px rgba(23, 37, 82, 0.03);
+}
+
+.learning-path-card.focus {
+    border-color: #7057f5;
+}
+
+.learning-path-card.upcoming {
+    background: #fafbff;
+}
+
+.learning-path-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #eef0f8;
+    color: #172552;
+    font-weight: 700;
+}
+
+.learning-path-card.focus .learning-path-number {
+    background: #eee9ff;
+    color: #7057f5;
+}
+
+.learning-path-card.strong .learning-path-number {
+    background: #e6f8ef;
+    color: #13865d;
+}
+
+.learning-path-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.learning-path-details > span {
+    font-size: 12px;
+    color: #8b94ab;
+}
+
+.learning-path-details h3 {
+    margin: 5px 0;
+    font-size: 17px;
+}
+
+.learning-path-details p {
+    margin: 0;
+    color: #64718c;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.learning-path-details small {
+    display: block;
+    margin-top: 8px;
+    color: #7057f5;
+}
+
+.learning-path-status {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: right;
+}
+
+.learning-path-status.strong {
+    color: #13865d;
+}
+
+.learning-path-status.focus {
+    color: #7057f5;
+}
+
+.learning-path-status.available {
+    color: #536582;
+}
+
+.learning-path-status.upcoming {
+    color: #8994ad;
+}
+
+.learning-path-dashboard,
+.learning-path-empty button {
+    margin-top: 40px;
+    padding: 15px 28px;
+    background: #7057f5;
+    color: white;
+    border: 0;
+    border-radius: 12px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.learning-path-dashboard:hover,
+.learning-path-empty button:hover {
+    background: #5941d9;
+}
+
+.learning-path-note {
+    margin-top: 28px;
+    color: #64718c;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.learning-path-empty {
+    padding: 55px 20px;
+    text-align: center;
+}
+
+.learning-path-empty p {
+    color: #64718c;
+}
+
+@media (max-width: 600px) {
+    .learning-path-page {
+        padding: 40px 16px 65px;
+    }
+
+    .learning-path-card {
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .learning-path-status {
+        width: 100%;
+        text-align: left;
+        padding-left: 56px;
+    }
+
+    .learning-path-summary {
+        padding: 22px 18px;
+    }
+}
+
+/* Learning Path layout */
+
+.learning-path-page {
+    min-height: calc(100vh - 80px);
+    background: #f5f7ff;
+    padding: 54px 24px 90px;
+}
+
+.learning-path-container {
+    width: 100%;
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+.learning-path-header {
+    text-align: center;
+    margin-bottom: 44px;
+}
+
+.learning-path-header h1 {
+    color: #172552;
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 800;
+    margin: 12px 0 16px;
+}
+
+.learning-path-header p {
+    color: #66718d;
+    font-size: 16px;
+    line-height: 1.7;
+}
+
+.learning-path-eyebrow {
+    color: #7057f5;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+/* Starting level summary */
+
+.learning-path-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 30px 36px;
+    margin-bottom: 32px;
+    background: white;
+    border: 1px solid #e3e7f5;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(23, 37, 82, 0.04);
+}
+
+.learning-path-summary p {
+    color: #66718d;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.learning-path-summary h2 {
+    color: #172552;
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 8px;
+}
+
+.learning-path-summary span {
+    color: #66718d;
+    font-size: 14px;
+}
+
+.learning-path-score {
+    width: 94px;
+    height: 94px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #f0edff;
+    color: #7057f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+/* Learning pathway cards */
+
+.learning-path-levels {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.learning-path-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 26px 30px;
+    background: white;
+    border: 1px solid #e3e7f5;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(23, 37, 82, 0.035);
+}
+
+.learning-path-number {
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: #f0edff;
+    color: #7057f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.learning-path-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.learning-path-details > span {
+    color: #7057f5;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.learning-path-details h3 {
+    color: #172552;
+    font-size: 20px;
+    font-weight: 800;
+    margin: 6px 0 8px;
+}
+
+.learning-path-details p {
+    color: #66718d;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 8px;
+}
+
+.learning-path-details small {
+    color: #66718d;
+    font-size: 12px;
+}
+
+/* Status indicators */
+
+.learning-path-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.learning-path-status.strong {
+    background: #e9f8ef;
+    color: #237b4b;
+}
+
+.learning-path-status.focus {
+    background: #f0edff;
+    color: #7057f5;
+}
+
+.learning-path-status.available {
+    background: #edf5ff;
+    color: #3566a6;
+}
+
+.learning-path-status.upcoming {
+    background: #f1f3f7;
+    color: #778196;
+}
+
+/* Highlight recommended focus */
+
+.learning-path-card.focus {
+    border: 2px solid #a99bff;
+    background: #fcfbff;
+}
+
+/* Dashboard button */
+
+.learning-path-dashboard {
+    display: block;
+    margin: 36px auto 20px;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(110deg, #6d5df7, #a054f5);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.learning-path-dashboard:hover {
+    filter: brightness(1.05);
+}
+
+.learning-path-note {
+    max-width: 750px;
+    margin: 0 auto;
+    text-align: center;
+    color: #778196;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Responsive */
+
+@media (max-width: 650px) {
+    .learning-path-page {
+        padding: 36px 16px 60px;
+    }
+
+    .learning-path-summary {
+        padding: 24px;
+    }
+
+    .learning-path-score {
+        width: 72px;
+        height: 72px;
+        font-size: 21px;
+    }
+
+    .learning-path-card {
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .learning-path-details {
+        flex-basis: calc(100% - 80px);
+    }
+
+    .learning-path-status {
+        margin-left: 74px;
+    }
+}

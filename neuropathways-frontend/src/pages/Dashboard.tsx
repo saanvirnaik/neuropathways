@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import ReadingPreferences from "../components/ReadingPreferences";
@@ -37,7 +37,7 @@ function Dashboard() {
 
     const [savingPreferences, setSavingPreferences] =
         useState(false);
-
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function loadDashboard() {
@@ -621,12 +621,13 @@ function Dashboard() {
                                             activity.
                                         </p>
 
-                                        <Link
-                                            to="/practice"
-                                            className="primary-form-button"
+                                        <button
+                                            type="button"
+                                            className="dashboard-practice-btn"
+                                            onClick={() => navigate("/practice")}
                                         >
-                                            Start Practice →
-                                        </Link>
+                                            Start Practice <span aria-hidden="true">→</span>
+                                        </button>
 
                                     </article>
 
@@ -888,12 +889,13 @@ function Dashboard() {
                                                     level check.
                                                 </p>
 
-                                                <Link
-                                                    to="/practice"
-                                                    className="primary-form-button"
+                                                <button
+                                                    type="button"
+                                                    className="dashboard-practice-btn"
+                                                    onClick={() => navigate("/practice")}
                                                 >
-                                                    Find Practice →
-                                                </Link>
+                                                    Find Practice <span aria-hidden="true">→</span>
+                                                </button>
 
                                             </>
 

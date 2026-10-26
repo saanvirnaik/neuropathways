@@ -1,117 +1,189 @@
-import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const pathway = [
-    {
-        status: "complete",
-        level: "Level 1",
-        title: "Sound & Letter Patterns",
-        description:
-            "Recognize common sounds, letters, and basic word patterns.",
-    },
-    {
-        status: "complete",
-        level: "Level 2",
-        title: "Word Decoding",
-        description:
-            "Break unfamiliar words into smaller parts and sound them out.",
-    },
-    {
-        status: "current",
-        level: "Level 3",
-        title: "Vocabulary in Context",
-        description:
-            "Use clues in a sentence to understand unfamiliar words.",
-    },
-    {
-        status: "locked",
-        level: "Level 4",
-        title: "Reading Fluency",
-        description:
-            "Build smoother reading with improved pacing and accuracy.",
-    },
-    {
-        status: "locked",
-        level: "Level 5",
-        title: "Reading Comprehension",
-        description:
-            "Understand main ideas, details, sequence, and meaning.",
-    },
-    {
-        status: "locked",
-        level: "Level 6",
-        title: "Inference & Deeper Meaning",
-        description:
-            "Use evidence and clues to understand ideas not directly stated.",
-    },
-];
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
+import {
+    getLearningPath,
+    type LearningPathResponse
+} from "../services/learningPathApi";
+import "../styles/learningpath.css";
+
+const STATUS_LABELS = {
+    STRONG: "Doing Well",
+    FOCUS: "Recommended Focus",
+    AVAILABLE: "Available",
+    UPCOMING: "Coming Next"
+};
 
 function LearningPath() {
+    const navigate = useNavigate();
+
+    const [pathway, setPathway] =
+        useState<LearningPathResponse | null>(null);
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        let active = true;
+
+        async function loadPathway() {
+            try {
+                const data = await getLearningPath();
+
+                if (active) {
+                    setPathway(data);
+                }
+            } catch (err) {
+                if (active) {
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Unable to load your learning pathway."
+                    );
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        }
+
+        void loadPathway();
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
     return (
         <>
             <Navbar />
 
             <main className="learning-path-page">
-                <section className="learning-path-header">
-          <span className="eyebrow">
-            YOUR PERSONALIZED PATHWAY
-          </span>
+                <div className="learning-path-container">
 
-                    <h1>Your Reading Journey Starts Here</h1>
+                    {loading && (
+                        <p role="status">
+                            Preparing your personalized pathway...
+                        </p>
+                    )}
 
-                    <p>
-                        Based on your assessment, NeuroPathways has identified the skills
-                        you already know and the best next step for you.
-                    </p>
+                    {!loading && error && (
+                        <div className="learning-path-empty">
+                            <h1>Your Pathway Is Waiting</h1>
+                            <p>{error}</p>
 
-                    <div className="current-level-card">
-                        <div>
-                            <span>Your Starting Level</span>
-                            <h2>Level 3 — Developing Reader</h2>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/dashboard")}
+                            >
+                                Go to Dashboard
+                            </button>
                         </div>
+                    )}
 
-                        <div className="score-circle">
-                            62%
-                        </div>
-                    </div>
-                </section>
+                    {!loading && pathway && (
+                        <>
+                            <header className="learning-path-header">
+                                <span className="learning-path-eyebrow">
+                                    YOUR PERSONALIZED PATHWAY
+                                </span>
 
-                <section className="pathway-container">
-                    {pathway.map((item, index) => (
-                        <article
-                            className={`pathway-card ${item.status}`}
-                            key={item.title}
-                        >
-                            <div className="pathway-number">
-                                {item.status === "complete"
-                                    ? "✓"
-                                    : index + 1}
-                            </div>
+                                <h1>
+                                    Your Reading Journey Starts Here
+                                </h1>
 
-                            <div className="pathway-content">
-                                <span>{item.level}</span>
-                                <h3>{item.title}</h3>
-                                <p>{item.description}</p>
-                            </div>
+                                <p>
+                                    Based on your assessment,
+                                    here are your reading strengths
+                                    and opportunities to grow.
+                                </p>
+                            </header>
 
-                            <div className="pathway-status">
-                                {item.status === "complete" && "Mastered"}
-                                {item.status === "current" && "Start Here"}
-                                {item.status === "locked" && "🔒 Locked"}
-                            </div>
-                        </article>
-                    ))}
-                </section>
+                            <section className="learning-path-summary">
+                                <div>
+                                    <p>Your Starting Level</p>
 
-                <div className="pathway-actions">
-                    <Link
-                        to="/dashboard"
-                        className="primary-form-button"
-                    >
-                        Go to My Dashboard →
-                    </Link>
+                                    <h2>
+                                        Level {pathway.startingLevel}
+                                    </h2>
+
+                                    <span>
+                                        Your assessment-based
+                                        starting point
+                                    </span>
+                                </div>
+
+                                <div className="learning-path-score">
+                                    {pathway.overallScore}%
+                                </div>
+                            </section>
+
+                            <section
+                                className="learning-path-levels"
+                                aria-label="Your learning pathway"
+                            >
+                                {pathway.levels.map((level) => (
+                                    <article
+                                        key={level.level}
+                                        className={
+                                            `learning-path-card ${level.pathwayStatus.toLowerCase()}`
+                                        }
+                                    >
+                                        <div className="learning-path-number">
+                                            {level.level}
+                                        </div>
+
+                                        <div className="learning-path-details">
+                                            <span>Level {level.level}</span>
+
+                                            <h3>{level.title}</h3>
+
+                                            <p>{level.description}</p>
+
+                                            {level.assessmentScore !== null && (
+                                                <small>
+                                                    Assessment skill score:{" "}
+                                                    {level.assessmentScore}%
+                                                </small>
+                                            )}
+                                        </div>
+
+                                        <span
+                                            className={
+                                                `learning-path-status ${level.pathwayStatus.toLowerCase()}`
+                                            }
+                                        >
+                                            {STATUS_LABELS[level.pathwayStatus]}
+                                        </span>
+                                    </article>
+                                ))}
+                            </section>
+
+                            <button
+                                type="button"
+                                className="learning-path-dashboard"
+                                onClick={() => navigate("/dashboard")}
+                            >
+                                Go to My Dashboard →
+                            </button>
+
+                            <p className="learning-path-note">
+                                Your pathway is a starting guide
+                                based on your assessment, not
+                                a diagnosis or a fixed measure
+                                of your abilities.
+                            </p>
+                        </>
+                    )}
+
                 </div>
             </main>
+
+            <Footer />
         </>
     );
 }

@@ -19,17 +19,39 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http
+    ) throws Exception {
 
         http
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .headers(headers ->
+                        headers.frameOptions(frame -> frame.sameOrigin())
+                )
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(
+                                SessionCreationPolicy.STATELESS
+                        )
+                )
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/auth/register", "/api/auth/login", "/actuator/health", "/api/version", "/api/contact").permitAll();
-                    if (h2ConsoleEnabled) { auth.requestMatchers("/h2-console/**").permitAll(); }
-                    else { auth.requestMatchers("/h2-console/**").denyAll(); }
+                    auth.requestMatchers(
+                            "/api/auth/register",
+                            "/api/auth/login",
+                            "/actuator/health",
+                            "/api/version",
+                            "/api/contact"
+                    ).permitAll();
+
+                    if (h2ConsoleEnabled) {
+                        auth.requestMatchers("/h2-console/**").permitAll();
+                    } else {
+                        auth.requestMatchers("/h2-console/**").denyAll();
+                    }
+
+                    auth.requestMatchers("/api/learning-path").authenticated();
+
                     auth.anyRequest().authenticated();
                 })
                 .oauth2ResourceServer(oauth2 ->

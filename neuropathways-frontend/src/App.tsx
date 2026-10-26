@@ -15,13 +15,17 @@ import Accessibility from "./pages/Accessibility";
 import Privacy from "./pages/Privacy";
 import Contact from "./pages/Contact";
 import ScrollToHash from "./components/ScrollToHash";
+import Practice from "./pages/Practice";
 
 function App() {
     return (
         <BrowserRouter>
             <ScrollToHash />
             <Routes>
-                <Route path="/assessment/session/:sessionId/results" element={<AssessmentResults/>}/>
+                <Route
+                    path="/assessment/session/:sessionId/results"
+                    element={<AssessmentResults />}
+                />
                 {/* Public pages */}
                 <Route path="/" element={<Home/>}/>
 
@@ -65,6 +69,7 @@ function App() {
                 <Route path="/accessibility" element={<Accessibility />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/practice" element={<Practice />} />
             </Routes>
         </BrowserRouter>
     );
