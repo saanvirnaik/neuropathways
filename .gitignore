@@ -48,3 +48,17 @@ deploy/environments.local.json
 .deploy-output/
 *.p12
 *.jks
+
+# Local H2 database
+data/
+*.mv.db
+*.trace.db
+
+# Local environment files
+.env
+.env.local
+
+# Build outputs
+node_modules/
+dist/
+target/
