@@ -1,6 +1,23 @@
 name: Deploy NeuroPathways
 run-name: NeuroPathways ${{ inputs.environment }} ${{ inputs.operation }} ${{ inputs.request_id }}
 on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+      operation:
+        type: string
+        default: Deploy
+      commit:
+        type: string
+        required: true
+      rollback:
+        type: string
+        default: ''
+      request_id:
+        type: string
+        default: automatic
   workflow_dispatch:
     inputs:
       environment:
@@ -98,7 +115,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: deployment-report
+          name: deployment-report-${{ inputs.environment }}
           path: .deploy-output/*.json
           include-hidden-files: true
           if-no-files-found: ignore

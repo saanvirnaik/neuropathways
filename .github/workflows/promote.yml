@@ -1,0 +1,62 @@
+name: Promote main through staging to production
+run-name: Promote verified main ${{ github.event.workflow_run.head_sha || github.sha }}
+on:
+  workflow_run:
+    workflows: [Validate application]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: neuropathways-promotion
+  cancel-in-progress: false
+jobs:
+  candidate:
+    if: >-
+      vars.PRODUCTION_DEPLOY_ENABLED == 'true' &&
+      ((github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_repository.full_name == github.repository) ||
+       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'))
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.verify.outputs.sha }}
+      current: ${{ steps.verify.outputs.current }}
+    steps:
+      - name: Require successful CI for the current main commit
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          CANDIDATE: ${{ github.event.workflow_run.head_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest=$(gh api "repos/$REPOSITORY/commits/main" --jq .sha)
+          if [[ "$latest" != "$CANDIDATE" ]]; then
+            echo 'Skipping a superseded main commit.'
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          passed=$(gh api "repos/$REPOSITORY/actions/workflows/validate.yml/runs?branch=main&event=push&head_sha=$CANDIDATE&per_page=100" --jq '[.workflow_runs[] | select(.head_sha == env.CANDIDATE and .conclusion == "success")] | length')
+          [[ "$passed" -gt 0 ]] || { echo 'Main commit has no successful validation run.'; exit 1; }
+          echo "sha=$CANDIDATE" >> "$GITHUB_OUTPUT"
+          echo 'current=true' >> "$GITHUB_OUTPUT"
+  staging:
+    needs: candidate
+    if: needs.candidate.outputs.current == 'true'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: Staging
+      commit: ${{ needs.candidate.outputs.sha }}
+      request_id: promotion-${{ github.run_id }}
+  production:
+    needs: [candidate, staging]
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: Production
+      commit: ${{ needs.candidate.outputs.sha }}
+      request_id: promotion-${{ github.run_id }}

@@ -25,6 +25,7 @@ class PostgresMigrationTests {
     @Test void freshPostgresSchemaAndRepeatMigration() {
         assertEquals(15, jdbc.queryForObject("select count(*) from assessment_questions", Integer.class));
         assertEquals(0, jdbc.queryForObject("select count(*) from users", Integer.class));
+        assertEquals(0, jdbc.queryForObject("select count(*) from contact_messages", Integer.class));
         assertEquals(0, flyway.migrate().migrationsExecuted);
     }
 }
