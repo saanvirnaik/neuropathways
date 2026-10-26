@@ -26,6 +26,12 @@ class PostgresMigrationTests {
         assertEquals(15, jdbc.queryForObject("select count(*) from assessment_questions", Integer.class));
         assertEquals(0, jdbc.queryForObject("select count(*) from users", Integer.class));
         assertEquals(0, jdbc.queryForObject("select count(*) from contact_messages", Integer.class));
+        assertEquals(75, jdbc.queryForObject("select count(*) from practice_questions", Integer.class));
+        assertEquals(15, jdbc.queryForObject("select count(*) from (select skill, difficulty from practice_questions where active = true group by skill, difficulty having count(*) >= 5) available_groups", Integer.class));
+        assertEquals(0, jdbc.queryForObject("select count(*) from practice_sessions", Integer.class));
+        assertEquals(0, jdbc.queryForObject("select count(*) from practice_session_questions", Integer.class));
+        assertEquals(0, jdbc.queryForObject("select count(*) from practice_responses", Integer.class));
         assertEquals(0, flyway.migrate().migrationsExecuted);
+        assertEquals(75, jdbc.queryForObject("select count(*) from practice_questions", Integer.class));
     }
 }
