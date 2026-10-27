@@ -1,0 +1,86 @@
+
+.guided-passage {
+    width: 100%;
+}
+
+.guided-passage-text {
+    font-size: inherit;
+    font-family: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+}
+
+.guided-sentence {
+    padding: 3px 2px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.guided-sentence.active {
+    background: #e9e3ff;
+    color: #172552;
+    border-radius: 6px;
+    box-shadow: 0 0 0 4px #e9e3ff;
+    font-weight: 600;
+}
+
+.guided-passage-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 12px;
+    border-top: 1px solid #d9d2ff;
+}
+
+.guided-passage-progress {
+    color: #7057f5;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.guided-passage-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.guided-passage-buttons button {
+    padding: 8px 12px;
+    border: 1px solid #d9d2ff;
+    border-radius: 8px;
+    background: white;
+    color: #7057f5;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.guided-passage-buttons button:hover:not(:disabled) {
+    background: #eeeaff;
+}
+
+.guided-passage-buttons button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.guided-passage-buttons button:focus-visible {
+    outline: 3px solid #7057f5;
+    outline-offset: 2px;
+}
+
+@media (max-width: 650px) {
+    .guided-passage-controls {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .guided-sentence {
+        transition: none;
+    }
+}

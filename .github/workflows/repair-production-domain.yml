@@ -1,0 +1,60 @@
+name: Repair production domain deployment marker
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/release-production-2026-10-26]
+    paths: [.github/workflows/repair-production-domain.yml]
+permissions:
+  contents: read
+concurrency:
+  group: deploy-Production
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify host and repair the renamed production path
+        shell: pwsh
+        env:
+          DEPLOY_CONFIG: ${{ vars.DEPLOY_CONFIG_JSON }}
+          SSH_KEY: ${{ secrets.HOSTINGER_SSH_KEY }}
+        run: |
+          $ErrorActionPreference='Stop'
+          $key="$env:RUNNER_TEMP/domain-repair-key"
+          $known="$env:RUNNER_TEMP/domain-repair-known-hosts"
+          try {
+            $env:DEPLOY_CONFIG | Set-Content deploy/environments.local.json
+            $cfg=($env:DEPLOY_CONFIG | ConvertFrom-Json).Production
+            if ($cfg.documentRoot -ne '/home/u781289971/domains/neuropathways.neurohearts.org/public_html' -or $cfg.sshHost -ne '82.197.80.222' -or $cfg.sshUser -ne 'u781289971' -or $cfg.sshPort -ne 65002) { throw 'Unexpected production target' }
+            $env:SSH_KEY | Set-Content $key
+            chmod 600 $key
+            ./scripts/Prepare-HostingerConnection.ps1 -ConfigPath deploy/environments.local.json -Environment Production -KnownHostsPath $known
+            $script=@'
+          set -euo pipefail
+          root=/home/u781289971/domains/neuropathways.neurohearts.org/public_html
+          old=/home/u781289971/domains/darkslateblue-gull-247391.hostingersite.com/public_html
+          state="$(dirname "$root")/.neuropathways-deploy"
+          [[ -d "$root" && ! -L "$root" && "$(realpath "$root")" == "$root" ]]
+          [[ -d "$state" && ! -L "$state" && -f "$state/managed" && ! -L "$state/managed" ]]
+          mkdir "$state/lock"
+          trap 'rmdir "$state/lock"' EXIT
+          marker=$(cat "$state/managed")
+          if [[ "$marker" == "$root" ]]; then echo 'Production marker already correct'; exit 0; fi
+          [[ "$marker" == "$old" ]]
+          [[ -f "$root/version.json" && ! -L "$root/version.json" ]]
+          grep -Eq '"commit"[[:space:]]*:[[:space:]]*"c28f0bc1e2b1f2f2c1a7cb36d75efd1230c1ab32"' "$root/version.json"
+          [[ -d "$root/releases/c28f0bc1e2b1f2f2c1a7cb36d75efd1230c1ab32-2ddfdf0cfb6d" ]]
+          [[ ! -e "$state/managed.before-domain-change" && ! -e "$state/managed.domain-next" ]]
+          cp -p "$state/managed" "$state/managed.before-domain-change"
+          printf '%s\n' "$root" > "$state/managed.domain-next"
+          mv "$state/managed.domain-next" "$state/managed"
+          echo 'Updated production deployment marker; application files and database unchanged'
+          '@
+            $script | & ssh -i $key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$known" -o ConnectTimeout=15 -p 65002 u781289971@82.197.80.222 'bash -s'
+            if ($LASTEXITCODE -ne 0) { throw 'Domain marker repair failed' }
+          } finally {
+            Remove-Item -LiteralPath $key,$known -Force -ErrorAction SilentlyContinue
+          }

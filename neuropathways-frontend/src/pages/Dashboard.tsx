@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import ReadingPreferences from "../components/ReadingPreferences";
+import { useReadingPreferences } from "../context/useReadingPreferences";
+import { mapLearnerPreferences } from "../context/readingPreferencesMapper";
 
 import {
     getDashboard,
@@ -35,78 +37,76 @@ function Dashboard() {
     const [error, setError] =
         useState("");
 
-    const [savingPreferences, setSavingPreferences] =
-        useState(false);
+    const [savingPreferences, setSavingPreferences] = useState(false);
+    const [preferenceSaveError, setPreferenceSaveError] = useState("");
+    const saveQueue = useRef<Promise<void>>(Promise.resolve());
+    const pendingSaves = useRef(0);
     const navigate = useNavigate();
+    const { updatePreferences } = useReadingPreferences();
 
     useEffect(() => {
+        let active = true;
+
         async function loadDashboard() {
             try {
                 setLoading(true);
                 setError("");
 
-                const [
-                    dashboardData,
-                    preferencesData,
-                ] = await Promise.all([
+                const [dashboardData, preferencesData] = await Promise.all([
                     getDashboard(),
                     getPreferences(),
                 ]);
 
+                if (!active) return;
+
                 setDashboard(dashboardData);
                 setPreferences(preferencesData);
-
+                updatePreferences(mapLearnerPreferences(preferencesData));
             } catch (err) {
-
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError(
-                        "Unable to load dashboard."
-                    );
-                }
-
+                if (!active) return;
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : "Unable to load dashboard."
+                );
             } finally {
-                setLoading(false);
+                if (active) setLoading(false);
             }
         }
 
-        loadDashboard();
-    }, []);
-
-
-    const handlePreferenceChange =
-        async (
-            updatedPreferences:
-            LearnerPreferences
-        ) => {
-
-            setPreferences(
-                updatedPreferences
-            );
-
-            setSavingPreferences(true);
-
-            try {
-
-                const saved =
-                    await savePreferences(
-                        updatedPreferences
-                    );
-
-                setPreferences(saved);
-
-            } catch (err) {
-
-                console.error(
-                    "Unable to save preferences:",
-                    err
-                );
-
-            } finally {
-                setSavingPreferences(false);
-            }
+        void loadDashboard();
+        return () => {
+            active = false;
         };
+    }, [updatePreferences]);
+
+    const handlePreferenceChange = (updatedPreferences: LearnerPreferences) => {
+        // Apply changes immediately in Dashboard, Practice, and Assessment.
+        setPreferences(updatedPreferences);
+        updatePreferences(mapLearnerPreferences(updatedPreferences));
+        setPreferenceSaveError("");
+        setSavingPreferences(true);
+        pendingSaves.current += 1;
+
+        // Serialize writes so rapid clicks cannot persist an older selection last.
+        saveQueue.current = saveQueue.current
+            .catch(() => undefined)
+            .then(async () => {
+                try {
+                    await savePreferences(updatedPreferences);
+                } catch (err) {
+                    console.error("Unable to save reading preferences:", err);
+                    setPreferenceSaveError(
+                        "Your reading settings could not be saved. Please try changing a setting again."
+                    );
+                } finally {
+                    pendingSaves.current -= 1;
+                    if (pendingSaves.current === 0) {
+                        setSavingPreferences(false);
+                    }
+                }
+            });
+    };
 
 
     if (loading) {
@@ -939,6 +939,11 @@ function Dashboard() {
                                     />
 
                                 )}
+                                {preferenceSaveError && (
+                                    <p role="alert" className="preference-save-error">
+                                        {preferenceSaveError}
+                                    </p>
+                                )}
 
 
                                 {/* REASSESS */}
@@ -1049,6 +1054,5 @@ function formatSkillLabel(
             return "";
     }
 }
-
 
 export default Dashboard;

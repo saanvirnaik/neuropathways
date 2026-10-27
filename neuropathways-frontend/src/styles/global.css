@@ -33,7 +33,40 @@ button {
     cursor: pointer;
 }
 
+:root {
+    --reading-font-size: 20px;
+    --reading-line-height: 1.7;
+    --reading-letter-spacing: normal;
+    --reading-word-spacing: normal;
+    --reading-background: #ffffff;
+    --reading-font-family: Arial, sans-serif;
+}
 
+.reading-content {
+    font-size: var(--reading-font-size);
+    line-height: var(--reading-line-height);
+    letter-spacing: var(--reading-letter-spacing);
+    word-spacing: var(--reading-word-spacing);
+    background: var(--reading-background);
+    font-family: var(--reading-font-family);
+}
+
+/* Ensure question and answer text inherits the preferences. */
+.reading-content h1,
+.reading-content h2,
+.reading-content h3,
+.reading-content p,
+.reading-content button,
+.reading-content .practice-option {
+    font-family: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+}
+
+.reading-content .practice-option {
+    font-size: inherit;
+    line-height: inherit;
+}
 /* =========================================================
    NAVIGATION
    ========================================================= */

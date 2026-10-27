@@ -1,0 +1,307 @@
+
+/* =========================================
+   Accessible Reading — Base
+   ========================================= */
+
+.accessible-reading {
+    width: 100%;
+    color: #172552;
+    border-radius: 16px;
+    line-height: 1.7;
+    font-family: Arial, sans-serif;
+    transition:
+            background-color 0.2s ease,
+            border-color 0.2s ease;
+}
+
+.accessible-reading-content {
+    font-size: inherit;
+    line-height: inherit;
+    font-family: inherit;
+}
+
+.accessible-reading-content p,
+.accessible-reading-content li,
+.accessible-reading-content label,
+.accessible-reading-content button,
+.accessible-reading-content .practice-option {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+}
+
+/* =========================================
+   Readable Font
+   ========================================= */
+
+.accessible-reading-font {
+    font-family: Verdana, Arial, sans-serif;
+}
+
+.accessible-reading-font .accessible-reading-content * {
+    font-family: inherit;
+}
+
+/* =========================================
+   Soft Background
+   ========================================= */
+
+.accessible-reading-soft {
+    background: #fffaf0;
+    padding: 20px;
+}
+
+/* =========================================
+   More Spacing
+   ========================================= */
+
+.accessible-reading-spaced {
+    line-height: 2.1;
+    letter-spacing: 0.04em;
+    word-spacing: 0.15em;
+}
+
+.accessible-reading-spaced .accessible-reading-content p,
+.accessible-reading-spaced .accessible-reading-content li {
+    margin-bottom: 1.2em;
+}
+
+.accessible-reading-spaced .practice-option,
+.accessible-reading-spaced .assessment-option {
+    line-height: 1.8;
+}
+
+/* =========================================
+   Focus Mode
+   ========================================= */
+
+.accessible-reading-focus {
+    border: 2px solid #7057f5;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow:
+            0 0 0 6px rgba(112, 87, 245, 0.06);
+}
+
+.accessible-reading-focus.accessible-reading-soft {
+    background: #fffaf0;
+}
+
+.accessible-reading-focus .accessible-reading-content {
+    position: relative;
+}
+
+.accessible-reading-focus .practice-passage,
+.accessible-reading-focus .assessment-passage {
+    border-left: 4px solid #7057f5;
+    padding: 16px 20px;
+    border-radius: 0 12px 12px 0;
+    background: rgba(112, 87, 245, 0.045);
+}
+
+/* =========================================
+   Practice Integration
+   ========================================= */
+
+.accessible-reading .practice-passage,
+.accessible-reading .practice-options .practice-option {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    font-family: inherit;
+}
+
+.accessible-reading h2 {
+    font-size: 1.15em;
+    line-height: 1.4;
+}
+
+.accessible-reading .practice-options {
+    margin-top: 20px;
+}
+
+/* =========================================
+   Assessment Integration
+   ========================================= */
+
+.accessible-reading .assessment-passage {
+    font-size: 1em;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    font-family: inherit;
+}
+
+.accessible-reading .assessment-question-text {
+    font-size: 1.15em;
+    line-height: 1.5;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    font-family: inherit;
+}
+
+.accessible-reading .assessment-option {
+    font-size: 1em;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    font-family: inherit;
+}
+
+.accessible-reading .assessment-option .option-text {
+    font-size: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    word-spacing: inherit;
+    font-family: inherit;
+}
+
+.accessible-reading .assessment-option .option-letter {
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+
+.accessible-reading-font .assessment-passage,
+.accessible-reading-font .assessment-question-text,
+.accessible-reading-font .assessment-option {
+    font-family: inherit;
+}
+
+/* =========================================
+   Responsive Layout
+   ========================================= */
+
+@media (max-width: 650px) {
+    .accessible-reading-soft,
+    .accessible-reading-focus {
+        padding: 14px;
+    }
+
+    .accessible-reading-guide {
+        padding: 14px;
+    }
+
+    .reading-guide-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .reading-guide-navigation {
+        flex-wrap: wrap;
+    }
+
+    .reading-guide-navigation button {
+        flex: 1;
+    }
+
+    .accessible-reading .assessment-question-text {
+        font-size: 1.1em;
+    }
+
+    .accessible-reading .assessment-option {
+        padding: 14px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .accessible-reading,
+    .reading-guide-sentence {
+        transition: none;
+    }
+}
+
+/* =========================================
+   Consistent accessible font sizing
+   ========================================= */
+
+/* Reading passage */
+.accessible-reading .practice-passage,
+.accessible-reading .assessment-passage,
+.accessible-reading .guided-passage-text,
+.accessible-reading .guided-sentence {
+    font-size: 1em;
+}
+
+/* Questions: slightly larger than passage */
+.accessible-reading h2,
+.accessible-reading .assessment-question-text {
+    font-size: 1.15em;
+}
+
+/* Answer choices */
+.accessible-reading .practice-option,
+.accessible-reading .assessment-option,
+.accessible-reading .assessment-option .option-text {
+    font-size: 1em;
+}
+
+/* Preserve readable font across all reading elements */
+.accessible-reading .practice-passage,
+.accessible-reading .practice-option,
+.accessible-reading .assessment-passage,
+.accessible-reading .assessment-question-text,
+.accessible-reading .assessment-option {
+    font-family: inherit;
+    line-height: inherit;
+}
+/* =========================================
+   Read Aloud + Focus Mode Toolbar
+   ========================================= */
+
+.accessible-reading .accessible-reading-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.accessible-reading .accessible-reading-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+/* Read Aloud button */
+.accessible-reading .accessible-reading-actions > button {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border: 1px solid #d9d2ff;
+    border-radius: 10px;
+    background: #f3efff;
+    color: #7057f5;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    cursor: pointer;
+}
+
+.accessible-reading .accessible-reading-actions > button:hover {
+    background: #eae4ff;
+}
+
+/* Focus Mode indicator */
+.accessible-reading .accessible-reading-actions > .accessible-focus-indicator {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    background: #f3efff;
+    border-radius: 999px;
+    color: #7057f5;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+/* Keyboard accessibility */
+.accessible-reading .accessible-reading-actions > button:focus-visible {
+    outline: 3px solid #7057f5;
+    outline-offset: 3px;
+}

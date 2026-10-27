@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
+import AccessibleReading from "../components/AccessibleReading";
 
 import { getLearningPath } from "../services/learningPathApi";
 
@@ -21,11 +22,23 @@ import {
 } from "../services/practiceService";
 
 import "../styles/practice.css";
+import GuidedPassage from "../components/GuidedPassage.tsx";
 
 type PracticeStage =
     | "choose"
     | "questions"
     | "complete";
+
+function getCurrentTime(): number {
+    return performance.now();
+}
+
+function calculateResponseTime(startedAt: number): number {
+    return Math.max(
+        0,
+        Math.round(getCurrentTime() - startedAt)
+    );
+}
 
 function Practice() {
     const navigate = useNavigate();
@@ -58,8 +71,14 @@ function Practice() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // Tracks time spent on the current question.
     const questionStartedAt = useRef<number>(0);
+
+    // Prevents duplicate backend requests.
     const requestInProgress = useRef(false);
+
+    // Records whether Read Aloud was used for this question.
+    const usedReadAloud = useRef(false);
 
     useEffect(() => {
         let active = true;
@@ -69,14 +88,17 @@ function Practice() {
                 const pathway = await getLearningPath();
 
                 const matchingSkill = PRACTICE_SKILLS.find(
-                    skill => skill.id === pathway.recommendedFocus
+                    skill =>
+                        skill.id === pathway.recommendedFocus
                 );
 
                 if (active) {
-                    setRecommendedSkill(matchingSkill?.id ?? null);
+                    setRecommendedSkill(
+                        matchingSkill?.id ?? null
+                    );
                 }
             } catch {
-                // Students may still select practice skills manually.
+                // Manual practice remains available.
             }
         }
 
@@ -103,11 +125,13 @@ function Practice() {
         setError(null);
 
         try {
-            const newSession = await startPracticeSession(skill);
+            const newSession =
+                await startPracticeSession(skill);
 
-            const question = await getCurrentPracticeQuestion(
-                newSession.sessionId
-            );
+            const question =
+                await getCurrentPracticeQuestion(
+                    newSession.sessionId
+                );
 
             setSelectedSkill(skill);
             setSession(newSession);
@@ -117,7 +141,8 @@ function Practice() {
             setResults(null);
             setStage("questions");
 
-            questionStartedAt.current = performance.now();
+            usedReadAloud.current = false;
+            questionStartedAt.current = getCurrentTime();
         } catch (err) {
             setError(
                 err instanceof Error
@@ -145,23 +170,23 @@ function Practice() {
         setSubmitting(true);
         setError(null);
 
-        const responseTimeMs = Math.max(
-            0,
-            Math.round(
-                performance.now() - questionStartedAt.current
-            )
+        const responseTimeMs = calculateResponseTime(
+            questionStartedAt.current
         );
 
         try {
-            const answerFeedback = await submitPracticeAnswer(
-                session.sessionId,
-                {
-                    questionId: currentQuestion.questionId,
-                    selectedOption: option,
-                    responseTimeMs,
-                    usedReadAloud: false
-                }
-            );
+            const answerFeedback =
+                await submitPracticeAnswer(
+                    session.sessionId,
+                    {
+                        questionId:
+                        currentQuestion.questionId,
+                        selectedOption: option,
+                        responseTimeMs,
+                        usedReadAloud:
+                        usedReadAloud.current
+                    }
+                );
 
             setSelectedAnswer(option);
             setFeedback(answerFeedback);
@@ -192,22 +217,25 @@ function Practice() {
 
         try {
             if (feedback.completed) {
-                const sessionResults = await getPracticeResults(
-                    session.sessionId
-                );
+                const sessionResults =
+                    await getPracticeResults(
+                        session.sessionId
+                    );
 
                 setResults(sessionResults);
                 setStage("complete");
             } else {
-                const question = await getCurrentPracticeQuestion(
-                    session.sessionId
-                );
+                const question =
+                    await getCurrentPracticeQuestion(
+                        session.sessionId
+                    );
 
                 setCurrentQuestion(question);
                 setSelectedAnswer(null);
                 setFeedback(null);
 
-                questionStartedAt.current = performance.now();
+                usedReadAloud.current = false;
+                questionStartedAt.current = getCurrentTime();
             }
         } catch (err) {
             setError(
@@ -230,7 +258,26 @@ function Practice() {
         setFeedback(null);
         setResults(null);
         setError(null);
+
+        usedReadAloud.current = false;
     }
+
+    // Prepare speech text from the backend question.
+    // The options object contains keys such as A, B, C, D.
+    const questionSpeechText = currentQuestion
+        ? [
+            currentQuestion.passage,
+            currentQuestion.question,
+            ...Object.entries(
+                currentQuestion.options
+            ).map(
+                ([key, option]) =>
+                    `Option ${key}: ${option}`
+            )
+        ]
+            .filter(Boolean)
+            .join(". ")
+        : "";
 
     return (
         <>
@@ -244,11 +291,14 @@ function Practice() {
                             YOUR PERSONALIZED PRACTICE
                         </span>
 
-                        <h1>Build Your Reading Skills</h1>
+                        <h1>
+                            Build Your Reading Skills
+                        </h1>
 
                         <p>
-                            Choose a skill, practice at your own pace,
-                            and celebrate every step forward.
+                            Choose a skill, practice at
+                            your own pace, and celebrate
+                            every step forward.
                         </p>
                     </header>
 
@@ -261,22 +311,34 @@ function Practice() {
                         </div>
                     )}
 
+                    {/* SKILL SELECTION */}
+
                     {stage === "choose" && (
                         <>
                             {recommendedSkillInfo && (
-                                <section className="practice-recommendation">
-                                    <span className="practice-eyebrow">
+                                <section
+                                    className="practice-recommendation"
+                                >
+                                    <span
+                                        className="practice-eyebrow"
+                                    >
                                         RECOMMENDED FOR YOU
                                     </span>
 
                                     <h2>
-                                        {recommendedSkillInfo.title}
+                                        {
+                                            recommendedSkillInfo.title
+                                        }
                                     </h2>
 
                                     <p>
-                                        {recommendedSkillInfo.description}
-                                        {" "}This recommendation is based
-                                        on your latest completed assessment.
+                                        {
+                                            recommendedSkillInfo.description
+                                        }
+                                        {" "}
+                                        This recommendation is
+                                        based on your latest
+                                        completed assessment.
                                     </p>
 
                                     <button
@@ -289,186 +351,287 @@ function Practice() {
                                             )
                                         }
                                     >
-                                        Start Recommended Practice →
+                                        Start Recommended
+                                        Practice →
                                     </button>
                                 </section>
                             )}
 
-                            <section className="practice-skill-section">
-                                <h2>Choose a Skill to Practice</h2>
+                            <section
+                                className="practice-skill-section"
+                            >
+                                <h2>
+                                    Choose a Skill to Practice
+                                </h2>
 
-                                <div className="practice-skill-grid">
-                                    {PRACTICE_SKILLS.map(skill => (
-                                        <button
-                                            type="button"
-                                            key={skill.id}
-                                            className="practice-skill-card"
-                                            disabled={loading}
-                                            onClick={() =>
-                                                startPractice(skill.id)
-                                            }
-                                        >
-                                            <h3>{skill.title}</h3>
-                                            <p>{skill.description}</p>
+                                <div
+                                    className="practice-skill-grid"
+                                >
+                                    {PRACTICE_SKILLS.map(
+                                        skill => (
+                                            <button
+                                                type="button"
+                                                key={skill.id}
+                                                className="practice-skill-card"
+                                                disabled={loading}
+                                                onClick={() =>
+                                                    startPractice(
+                                                        skill.id
+                                                    )
+                                                }
+                                            >
+                                                <h3>
+                                                    {skill.title}
+                                                </h3>
 
-                                            <span>
-                                                Start Practice →
-                                            </span>
-                                        </button>
-                                    ))}
+                                                <p>
+                                                    {
+                                                        skill.description
+                                                    }
+                                                </p>
+
+                                                <span>
+                                                    Start Practice →
+                                                </span>
+                                            </button>
+                                        )
+                                    )}
                                 </div>
                             </section>
                         </>
                     )}
 
-                    {stage === "questions" && currentQuestion && (
-                        <section className="practice-question-card">
+                    {/* PRACTICE QUESTIONS */}
 
-                            <div className="practice-question-top">
-                                <span className="practice-eyebrow">
-                                    QUESTION{" "}
-                                    {currentQuestion.questionNumber}
-                                    {" "}OF{" "}
-                                    {currentQuestion.totalQuestions}
-                                </span>
-
-                                <span>
-                                    {selectedSkillInfo?.title}
-                                    {" · "}
-                                    Difficulty {currentQuestion.difficulty}
-                                </span>
-                            </div>
-
-                            <div className="practice-progress-track">
+                    {stage === "questions" &&
+                        currentQuestion && (
+                            <section
+                                className="practice-question-card"
+                            >
                                 <div
-                                    className="practice-progress-fill"
-                                    style={{
-                                        width: `${
-                                            (currentQuestion.questionNumber /
-                                                currentQuestion.totalQuestions)
-                                            * 100
-                                        }%`
-                                    }}
-                                />
-                            </div>
-
-                            {currentQuestion.passage && (
-                                <div className="practice-passage">
-                                    {currentQuestion.passage}
-                                </div>
-                            )}
-
-                            <h2>{currentQuestion.question}</h2>
-
-                            <div className="practice-options">
-                                {Object.entries(
-                                    currentQuestion.options
-                                ).map(([key, option]) => {
-                                    let optionClass =
-                                        "practice-option";
-
-                                    if (feedback) {
-                                        if (
-                                            key ===
-                                            feedback.correctOption
-                                        ) {
-                                            optionClass += " correct";
-                                        } else if (
-                                            key === selectedAnswer
-                                        ) {
-                                            optionClass += " incorrect";
+                                    className="practice-question-top"
+                                >
+                                    <span
+                                        className="practice-eyebrow"
+                                    >
+                                        QUESTION{" "}
+                                        {
+                                            currentQuestion.questionNumber
                                         }
-                                    }
+                                        {" "}OF{" "}
+                                        {
+                                            currentQuestion.totalQuestions
+                                        }
+                                    </span>
 
-                                    return (
+                                    <span>
+                                        {
+                                            selectedSkillInfo?.title
+                                        }
+                                        {" · "}
+                                        Difficulty{" "}
+                                        {
+                                            currentQuestion.difficulty
+                                        }
+                                    </span>
+                                </div>
+
+                                <div
+                                    className="practice-progress-track"
+                                >
+                                    <div
+                                        className="practice-progress-fill"
+                                        style={{
+                                            width: `${
+                                                (
+                                                    currentQuestion.questionNumber /
+                                                    currentQuestion.totalQuestions
+                                                ) * 100
+                                            }%`
+                                        }}
+                                    />
+                                </div>
+
+                                {/*
+                                  AccessibleReading applies:
+                                  - Text Size
+                                  - Readable Font
+                                  - Soft Background
+                                  - More Spacing
+                                  - Focus Mode
+                                  - Reading Guide
+                                  - Text to Speech
+                                */}
+
+                                <AccessibleReading
+                                    key={
+                                        currentQuestion.questionId
+                                    }
+                                    speechText={
+                                        questionSpeechText
+                                    }
+                                    onReadAloud={() => {
+                                        usedReadAloud.current =
+                                            true;
+                                    }}
+                                >
+                                    {currentQuestion.passage && (
+                                        <GuidedPassage
+                                            key={currentQuestion.questionId}
+                                            text={currentQuestion.passage}
+                                            className="practice-passage"
+                                        />
+                                    )}
+
+                                    <h2>
+                                        {
+                                            currentQuestion.question
+                                        }
+                                    </h2>
+
+                                    <div
+                                        className="practice-options"
+                                    >
+                                        {Object.entries(
+                                            currentQuestion.options
+                                        ).map(
+                                            ([key, option]) => {
+                                                let optionClass =
+                                                    "practice-option";
+
+                                                if (feedback) {
+                                                    if (
+                                                        key ===
+                                                        feedback.correctOption
+                                                    ) {
+                                                        optionClass +=
+                                                            " correct";
+                                                    } else if (
+                                                        key ===
+                                                        selectedAnswer
+                                                    ) {
+                                                        optionClass +=
+                                                            " incorrect";
+                                                    }
+                                                }
+
+                                                return (
+                                                    <button
+                                                        type="button"
+                                                        key={key}
+                                                        className={
+                                                            optionClass
+                                                        }
+                                                        disabled={
+                                                            submitting ||
+                                                            loading ||
+                                                            feedback !==
+                                                            null
+                                                        }
+                                                        onClick={() =>
+                                                            selectAnswer(
+                                                                key
+                                                            )
+                                                        }
+                                                    >
+                                                        {option}
+                                                    </button>
+                                                );
+                                            }
+                                        )}
+                                    </div>
+                                </AccessibleReading>
+
+                                {/* ANSWER FEEDBACK */}
+
+                                {feedback && (
+                                    <div
+                                        className="practice-feedback"
+                                        role="status"
+                                    >
+                                        <h3>
+                                            {feedback.correct
+                                                ? "Great work!"
+                                                : "Good effort! Let's learn together."}
+                                        </h3>
+
+                                        <p>
+                                            {
+                                                feedback.explanation
+                                            }
+                                        </p>
+
                                         <button
                                             type="button"
-                                            key={key}
-                                            className={optionClass}
-                                            disabled={
-                                                submitting ||
-                                                loading ||
-                                                feedback !== null
-                                            }
-                                            onClick={() =>
-                                                selectAnswer(key)
+                                            className="practice-primary-button"
+                                            disabled={loading}
+                                            onClick={
+                                                nextQuestion
                                             }
                                         >
-                                            {option}
+                                            {feedback.completed
+                                                ? "See My Results →"
+                                                : "Next Question →"}
                                         </button>
-                                    );
-                                })}
-                            </div>
+                                    </div>
+                                )}
 
-                            {feedback && (
-                                <div
-                                    className="practice-feedback"
-                                    role="status"
-                                >
-                                    <h3>
-                                        {feedback.correct
-                                            ? "Great work!"
-                                            : "Good effort! Let's learn together."}
-                                    </h3>
-
-                                    <p>
-                                        {feedback.explanation}
+                                {submitting && (
+                                    <p role="status">
+                                        Saving your answer...
                                     </p>
+                                )}
+                            </section>
+                        )}
 
-                                    <button
-                                        type="button"
-                                        className="practice-primary-button"
-                                        disabled={loading}
-                                        onClick={nextQuestion}
-                                    >
-                                        {feedback.completed
-                                            ? "See My Results →"
-                                            : "Next Question →"}
-                                    </button>
-                                </div>
-                            )}
-
-                            {submitting && (
-                                <p role="status">
-                                    Saving your answer...
-                                </p>
-                            )}
-
-                        </section>
-                    )}
+                    {/* PRACTICE RESULTS */}
 
                     {stage === "complete" && results && (
-                        <section className="practice-complete-card">
-
-                            <span className="practice-eyebrow">
+                        <section
+                            className="practice-complete-card"
+                        >
+                            <span
+                                className="practice-eyebrow"
+                            >
                                 PRACTICE COMPLETE
                             </span>
 
-                            <h2>Great Job Practicing!</h2>
+                            <h2>
+                                Great Job Practicing!
+                            </h2>
 
-                            <div className="practice-result-circle">
+                            <div
+                                className="practice-result-circle"
+                            >
                                 {results.scorePercent}%
                             </div>
 
                             <p>
                                 You answered{" "}
-                                {results.correctAnswers} out of{" "}
-                                {results.totalQuestions} questions correctly.
+                                {results.correctAnswers}
+                                {" "}out of{" "}
+                                {results.totalQuestions}
+                                {" "}questions correctly.
                             </p>
 
                             <p>
-                                Every practice session is a chance
-                                to learn and grow.
+                                Every practice session
+                                is a chance to learn
+                                and grow.
                             </p>
 
-                            <div className="practice-complete-actions">
+                            <div
+                                className="practice-complete-actions"
+                            >
                                 {selectedSkill && (
                                     <button
                                         type="button"
                                         className="practice-primary-button"
                                         disabled={loading}
                                         onClick={() =>
-                                            startPractice(selectedSkill)
+                                            startPractice(
+                                                selectedSkill
+                                            )
                                         }
                                     >
                                         Practice Again
@@ -478,7 +641,9 @@ function Practice() {
                                 <button
                                     type="button"
                                     className="practice-secondary-button"
-                                    onClick={backToSkills}
+                                    onClick={
+                                        backToSkills
+                                    }
                                 >
                                     Choose Another Skill
                                 </button>
@@ -487,23 +652,32 @@ function Practice() {
                                     type="button"
                                     className="practice-secondary-button"
                                     onClick={() =>
-                                        navigate("/dashboard")
+                                        navigate(
+                                            "/dashboard"
+                                        )
                                     }
                                 >
                                     Back to Dashboard
                                 </button>
                             </div>
 
-                            <p className="practice-disclaimer">
-                                Practice scores support learning feedback.
-                                They do not provide a diagnosis or
-                                establish reading mastery.
+                            <p
+                                className="practice-disclaimer"
+                            >
+                                Practice scores support
+                                learning feedback.
+                                They do not provide
+                                a diagnosis or establish
+                                reading mastery.
                             </p>
                         </section>
                     )}
 
                     {loading && (
-                        <p className="practice-loading" role="status">
+                        <p
+                            className="practice-loading"
+                            role="status"
+                        >
                             Preparing your practice...
                         </p>
                     )}
