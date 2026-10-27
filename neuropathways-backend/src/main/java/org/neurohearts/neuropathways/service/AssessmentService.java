@@ -282,14 +282,6 @@ public class AssessmentService {
 
         session.setOverallScore(overallScore);
 
-
-        /*
-         * Keep a high-level reading level
-         * for now.
-         *
-         * Later this can be replaced by
-         * pathway-specific placement logic.
-         */
         session.setCalculatedLevel(calculateLevel(overallScore));
 
         session.setStatus(AssessmentStatus.COMPLETED);

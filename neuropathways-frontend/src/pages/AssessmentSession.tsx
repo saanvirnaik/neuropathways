@@ -1,15 +1,29 @@
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
+import AccessibleReading from "../components/AccessibleReading";
+
 import {
     getCurrentQuestion,
     submitAssessmentAnswer,
+    type AssessmentQuestion
 } from "../services/assessmentService";
+import GuidedPassage from "../components/GuidedPassage.tsx";
 
-import type {
-    AssessmentQuestion,
-} from "../services/assessmentService";
+type AssessmentLoadState = "loading" | "ready" | "error";
+
+function getCurrentTime(): number {
+    return performance.now();
+}
+
+function calculateResponseTime(startedAt: number): number {
+    return Math.max(
+        0,
+        Math.round(getCurrentTime() - startedAt)
+    );
+}
 
 function AssessmentSession() {
     const { sessionId } = useParams();
@@ -21,8 +35,8 @@ function AssessmentSession() {
     const [selectedOption, setSelectedOption] =
         useState("");
 
-    const [loading, setLoading] =
-        useState(true);
+    const [loadState, setLoadState] =
+        useState<AssessmentLoadState>("loading");
 
     const [submitting, setSubmitting] =
         useState(false);
@@ -30,17 +44,24 @@ function AssessmentSession() {
     const [error, setError] =
         useState("");
 
-    const [questionStartedAt, setQuestionStartedAt] =
-        useState<number>(Date.now());
+    // Track time spent answering the current question.
+    const questionStartedAt = useRef<number>(0);
 
-    const [usedReadAloud, setUsedReadAloud] =
-        useState(false);
+    // Track whether Read Aloud was actually used.
+    const usedReadAloud = useRef(false);
+
+    // Prevent duplicate answer submissions.
+    const requestInProgress = useRef(false);
 
     useEffect(() => {
+        let active = true;
+
         async function loadQuestion() {
             if (!sessionId) {
-                setError("Assessment session not found.");
-                setLoading(false);
+                if (active) {
+                    setError("Assessment session not found.");
+                    setLoadState("error");
+                }
                 return;
             }
 
@@ -49,120 +70,106 @@ function AssessmentSession() {
                     Number(sessionId)
                 );
 
+                if (!active) return;
+
                 setQuestion(data);
                 setSelectedOption("");
-                setQuestionStartedAt(Date.now());
+                setError("");
+                setLoadState("ready");
+
+                usedReadAloud.current = false;
+                questionStartedAt.current = getCurrentTime();
+
             } catch (err) {
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError(
-                        "Unable to load assessment question."
-                    );
-                }
-            } finally {
-                setLoading(false);
+                if (!active) return;
+
+                setError(
+                    err instanceof Error
+                        ? err.message
+                        : "Unable to load assessment question."
+                );
+
+                setLoadState("error");
             }
         }
 
-        loadQuestion();
+        void loadQuestion();
+
+        return () => {
+            active = false;
+        };
     }, [sessionId]);
 
-    const handleReadAloud = () => {
-        if (!question) {
-            return;
-        }
-
-        const text = [
-            question.passage,
-            question.question,
-        ]
-            .filter(Boolean)
-            .join(". ");
-
-        window.speechSynthesis.cancel();
-
-        const utterance =
-            new SpeechSynthesisUtterance(text);
-
-        utterance.rate = 0.9;
-
-        window.speechSynthesis.speak(
-            utterance
-        );
-
-        setUsedReadAloud(true);
-    };
-
-    const handleSubmit = async () => {
+    async function handleSubmit() {
         if (
             !question ||
             !sessionId ||
-            !selectedOption
+            !selectedOption ||
+            submitting ||
+            requestInProgress.current
         ) {
             return;
         }
 
+        requestInProgress.current = true;
         setSubmitting(true);
         setError("");
 
+        const responseTimeMs = calculateResponseTime(
+            questionStartedAt.current
+        );
+
         try {
-            const responseTimeMs =
-                Date.now() - questionStartedAt;
+            const status = await submitAssessmentAnswer(
+                Number(sessionId),
+                {
+                    questionId: question.questionId,
+                    selectedOption,
+                    responseTimeMs,
+                    usedReadAloud: usedReadAloud.current
+                }
+            );
 
-            const status =
-                await submitAssessmentAnswer(
-                    Number(sessionId),
-                    {
-                        questionId:
-                        question.questionId,
-
-                        selectedOption,
-
-                        responseTimeMs,
-
-                        usedReadAloud,
-                    }
-                );
-
-            if (
-                status.status === "COMPLETED"
-            ) {
+            if (status.status === "COMPLETED") {
                 navigate(
                     `/assessment/session/${sessionId}/results`
                 );
                 return;
             }
 
-            const nextQuestion =
-                await getCurrentQuestion(
-                    Number(sessionId)
-                );
+            const nextQuestion = await getCurrentQuestion(
+                Number(sessionId)
+            );
 
             setQuestion(nextQuestion);
             setSelectedOption("");
-            setUsedReadAloud(false);
-            setQuestionStartedAt(Date.now());
+            setError("");
+
+            usedReadAloud.current = false;
+            questionStartedAt.current = getCurrentTime();
+
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError(
-                    "Unable to submit your answer."
-                );
-            }
+            setError(
+                err instanceof Error
+                    ? err.message
+                    : "Unable to submit your answer."
+            );
         } finally {
             setSubmitting(false);
+            requestInProgress.current = false;
         }
-    };
+    }
 
-    if (loading) {
+    if (loadState === "loading") {
         return (
             <>
                 <Navbar />
 
                 <main className="assessment-page">
-                    <div className="dashboard-loading">
+                    <div
+                        className="dashboard-loading"
+                        role="status"
+                    >
                         Loading assessment...
                     </div>
                 </main>
@@ -170,7 +177,7 @@ function AssessmentSession() {
         );
     }
 
-    if (error || !question) {
+    if (loadState === "error" || !question) {
         return (
             <>
                 <Navbar />
@@ -182,21 +189,39 @@ function AssessmentSession() {
                         </h2>
 
                         <p>
-                            {error ||
-                                "Please try again."}
+                            {error || "Please try again."}
                         </p>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate("/dashboard")}
+                        >
+                            Back to Dashboard
+                        </button>
                     </div>
                 </main>
             </>
         );
     }
 
-    const progress =
-        Math.round(
-            ((question.questionNumber - 1) /
-                question.totalQuestions) *
-            100
-        );
+    const progress = Math.round(
+        (
+            (question.questionNumber - 1) /
+            question.totalQuestions
+        ) * 100
+    );
+
+    // Prepare the passage, question, and answer choices
+    // for the AccessibleReading text-to-speech feature.
+    const questionSpeechText = [
+        question.passage,
+        question.question,
+        ...Object.entries(question.options).map(
+            ([key, value]) => `Option ${key}: ${value}`
+        )
+    ]
+        .filter(Boolean)
+        .join(". ");
 
     return (
         <>
@@ -205,23 +230,28 @@ function AssessmentSession() {
             <main className="assessment-page">
                 <section className="assessment-session-container">
 
+                    {/* ASSESSMENT HEADER */}
+
                     <div className="assessment-session-topbar">
                         <div className="assessment-title-block">
+
                             <div className="assessment-title-icon">
                                 📖
                             </div>
 
                             <div>
-                            <span className="eyebrow">
-                                {formatSkillName(question.skill)}
-                            </span>
+                                <span className="eyebrow">
+                                    {formatSkillName(question.skill)}
+                                </span>
 
                                 <h1>
                                     Reading Assessment
                                 </h1>
 
                                 <p className="assessment-question-count">
-                                    Question {question.questionNumber} of{" "}
+                                    Question{" "}
+                                    {question.questionNumber}
+                                    {" "}of{" "}
                                     {question.totalQuestions}
                                 </p>
                             </div>
@@ -229,62 +259,62 @@ function AssessmentSession() {
 
                         <div className="assessment-progress-info">
                             <strong>
-                                {question.questionNumber} /{" "}
+                                {question.questionNumber}
+                                {" / "}
                                 {question.totalQuestions}
                             </strong>
 
                             <span>
-                            {progress}% Complete
-                        </span>
+                                {progress}% Complete
+                            </span>
                         </div>
                     </div>
+
+                    {/* PROGRESS BAR */}
 
                     <div className="progress-bar">
                         <div
                             className="progress-fill"
                             style={{
-                                width: `${progress}%`,
+                                width: `${progress}%`
                             }}
                         />
                     </div>
 
+                    {/* ASSESSMENT QUESTION */}
+
                     <div className="assessment-question-card">
 
-                        <div className="assessment-question-toolbar">
+                        <AccessibleReading
+                            key={question.questionId}
+                            speechText={questionSpeechText}
+                            onReadAloud={() => {
+                                usedReadAloud.current = true;
+                            }}
+                        >
 
-                            <button
-                                type="button"
-                                className="assessment-audio-button"
-                                onClick={handleReadAloud}
-                            >
-                            <span className="assessment-audio-icon">
-                                🔊
-                            </span>
+                            {/* READING PASSAGE */}
 
-                                <span>
-                                Read Aloud
-                            </span>
-                            </button>
+                            {question.passage && (
+                                <GuidedPassage
+                                    key={question.questionId}
+                                    text={question.passage}
+                                    className="assessment-passage"
+                                />
+                            )}
 
-                        </div>
+                            {/* QUESTION */}
 
-                        {question.passage && (
-                            <div className="assessment-passage">
-                                {question.passage}
-                            </div>
-                        )}
+                            <h2 className="assessment-question-text">
+                                {question.question}
+                            </h2>
 
-                        <h2 className="assessment-question-text">
-                            {question.question}
-                        </h2>
+                            {/* ANSWER OPTIONS */}
 
-                        <div className="assessment-options">
-
-                            {Object.entries(
-                                question.options
-                            ).map(
-                                ([key, value]) => (
-
+                            <div className="assessment-options">
+                                {Object.entries(
+                                    question.options
+                                ).map(([key, value]) => (
                                     <button
                                         key={key}
                                         type="button"
@@ -293,38 +323,50 @@ function AssessmentSession() {
                                                 ? "assessment-option selected"
                                                 : "assessment-option"
                                         }
+                                        disabled={submitting}
+                                        aria-pressed={
+                                            selectedOption === key
+                                        }
                                         onClick={() =>
                                             setSelectedOption(key)
                                         }
                                     >
-                                    <span className="option-letter">
-                                        {key}
-                                    </span>
+                                        <span className="option-letter">
+                                            {key}
+                                        </span>
 
                                         <span className="option-text">
-                                        {value}
-                                    </span>
+                                            {value}
+                                        </span>
 
                                         {selectedOption === key && (
-                                            <span className="option-selected-check">
-                                            ✓
-                                        </span>
+                                            <span
+                                                className="option-selected-check"
+                                                aria-hidden="true"
+                                            >
+                                                ✓
+                                            </span>
                                         )}
                                     </button>
+                                ))}
+                            </div>
 
-                                )
-                            )}
+                        </AccessibleReading>
 
-                        </div>
+                        {/* ERROR MESSAGE */}
 
                         {error && (
-                            <div className="form-error">
+                            <div
+                                className="form-error"
+                                role="alert"
+                            >
                                 {error}
                             </div>
                         )}
 
-                        <div className="assessment-question-actions">
+                        {/* QUESTION ACTIONS */}
 
+                        <div className="assessment-question-actions">
                             <button
                                 type="button"
                                 className="primary-form-button"
@@ -341,7 +383,6 @@ function AssessmentSession() {
                                         ? "Finish Assessment →"
                                         : "Next Question →"}
                             </button>
-
                         </div>
 
                     </div>
@@ -352,14 +393,12 @@ function AssessmentSession() {
     );
 }
 
-function formatSkillName(
-    skill: string
-) {
+function formatSkillName(skill: string): string {
     return skill
         .toLowerCase()
         .split("_")
         .map(
-            (word) =>
+            word =>
                 word.charAt(0).toUpperCase() +
                 word.slice(1)
         )
